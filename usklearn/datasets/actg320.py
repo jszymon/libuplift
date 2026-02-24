@@ -30,8 +30,8 @@ def fetch_actg320(data_home=None,
     The description of the original study can be found in [1]_.
 
     The main treatment variable indicates whether treatment includes
-    IDV.  The treatment_grp variable contains one of four specific
-    treatments given:
+    IDV (Indinavir).  The treatment_grp variable contains one of four
+    specific treatments given:
     1 = ZDV + 3TC
     2 = ZDV + 3TC + IDV
     3 = d4T + 3TC 
@@ -130,7 +130,7 @@ def fetch_actg320(data_home=None,
        Analogues plus Indinavir in Persons with Human Immunodeficiency
        Virus Infection and CD4 Cell Counts of 200 per Cubic Millimeter
        or Less", New England Journal of Medicine, 337(11), 725--733,
-       1997 (https://www.nejm.org/doi/10.1056/NEJMoa040595).
+       1997 (https://www.nejm.org/doi/10.1056/NEJM199709113371101)
 
     .. [2] Hosmer, D.W. and Lemeshow, S. and May, S.,  Applied
        Survival Analysis: Regression Modeling of Time to Event Data:
