@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "uplift-sklearn"
+name = "libuplift"
 authors = [
     {name = "Szymon Jaroszewicz", email = "jszymon@gmail.com"},
     {name = "Krzysztof Rudaś", email = "krzysztof.rudas@ipipan.waw.pl"},

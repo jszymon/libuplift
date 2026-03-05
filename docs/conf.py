@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'uplift-sklearn'
+project = 'libuplift'
 copyright = '2025, Szymon Jaroszewicz'
 author = 'Szymon Jaroszewicz, Krzysztof Rudaś'
 
@@ -156,7 +156,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'uplift_sklearn.tex', 'uplift\\_sklearn Documentation',
+    (master_doc, 'libuplift.tex', 'libuplift Documentation',
      'Szymon Jaroszewicz', 'manual'),
 ]
 
@@ -166,7 +166,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'uplift-sklearn', 'uplift-sklearn Documentation',
+    (master_doc, 'libuplift', 'libuplift Documentation',
      [author], 1)
 ]
 
@@ -177,8 +177,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'uplift-sklearn', 'uplift-sklearn Documentation',
-     author, 'uplift-sklearn', 'One line description of project.',
+    (master_doc, 'libuplift', 'libuplift Documentation',
+     author, 'libuplift', 'One line description of project.',
      'Miscellaneous'),
 ]
 

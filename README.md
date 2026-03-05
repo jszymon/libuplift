@@ -1,4 +1,4 @@
-# uplift-sklearn
+# libuplift
 
 ### Uplift modeling package based on and integrated with `scikit-learn`.
 
@@ -7,7 +7,7 @@
 
 ## Design goals
 
-The design goal of `uplift-sklearn` is to seamlessly integrate with `scikit-learn` and follow its conventions as closely as possible.  It is possible to use model evaluation and tuning facilities from `scikit-learn` either directly or as thin wrappers provided by `uplift-sklearn`.
+The design goal of `libuplift` is to seamlessly integrate with `scikit-learn` and follow its conventions as closely as possible.  It is possible to use model evaluation and tuning facilities from `scikit-learn` either directly or as thin wrappers provided by `libuplift`.
 
 
 ## Features
@@ -20,10 +20,10 @@ The design goal of `uplift-sklearn` is to seamlessly integrate with `scikit-lear
 
 ## Getting started
 
-To install `uplift-sklearn` simply use
+To install `libuplift` simply use
 
 ``` shell
-pip install uplift-sklearn
+pip install libuplift
 ```
 or to get the latest version install directly from Github
 ``` shell
@@ -58,7 +58,7 @@ y = D.target_visit[mask]
 trt = (trt[mask] == 2)*1
 ```
 
-By `uplift-sklearn` convention, treatments are denoted by successive integers with 0 indicating controls. Addtionally the special `n_trt` argument is passed to all methods to indicate the number of treatments (if `n_trt` is `None` it will be inferred automatically, but this may be unreliable and is discouraged).
+By `libuplift` convention, treatments are denoted by successive integers with 0 indicating controls. Addtionally the special `n_trt` argument is passed to all methods to indicate the number of treatments (if `n_trt` is `None` it will be inferred automatically, but this may be unreliable and is discouraged).
 
 Now, we're ready to fit an uplift model (TLearner in our case)
 
@@ -86,7 +86,7 @@ plt.show()
 
 One can use `cross_val_score` and `GridSearchCV` to easily evaluate
 models or tune their parameters, just as one does in `scikit-learn`.
-The functions provided by `uplift-sklearn` are thin wrappers of
+The functions provided by `libuplift` are thin wrappers of
 original `scikit-learn` functions so they behave exactly the same as
 they would for standard classifiers.
 
@@ -160,4 +160,4 @@ We can see that the model is significantly better than random guessing and optim
 
 ## Documenation
 
-The documentation is available on [Read the Docs](https://uplift-sklearn.readthedocs.io/en/latest/)
+The documentation is available on [Read the Docs](https://libuplift.readthedocs.io/en/latest/)

@@ -25,7 +25,7 @@ class _BaseUpliftMixin:
 
 class UpliftRegressorMixin(_BaseUpliftMixin, RegressorMixin):
     """Mixin class for all uplift regression estimators in
-    uplift-sklearn."""
+    libuplift."""
 
     _estimator_type = "regressor"
     _uplift_model = True
@@ -41,7 +41,7 @@ class UpliftRegressorMixin(_BaseUpliftMixin, RegressorMixin):
 
 class UpliftClassifierMixin(_BaseUpliftMixin, ClassifierMixin):
     """Mixin class for all uplift classification estimators in
-    uplift-sklearn."""
+    libuplift."""
 
     _estimator_type = "classifier"
     _uplift_model = True

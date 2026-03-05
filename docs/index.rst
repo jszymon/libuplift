@@ -1,9 +1,11 @@
-.. uplift-sklearn documentation master file, created by
+=======
+.. libuplift documentation master file, created by
    sphinx-quickstart on Thu Jul 11 14:45:25 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to uplift-sklearn's documentation!
+Welcome to libuplift's documentation!
+=====================================
 ==========================================
 
 .. toctree::
@@ -12,12 +14,18 @@ Welcome to uplift-sklearn's documentation!
 
    autoapi/index
 
-.. uplift-sklearn documentation master file, created by
+
+uplift-sklearn is an uplift modeling package based on and integrated with ``scikit-learn``.
+=======
+.. libuplift documentation master file, created by
    sphinx-quickstart on Thu Dec 11 2025.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-uplift-sklearn
+libuplift
+=========
+
+libuplift is an uplift modeling package based on and integrated with ``scikit-learn``.
 ==============
 
 uplift-sklearn is an uplift modeling package based on and integrated with ``scikit-learn``.
@@ -27,7 +35,7 @@ Authors: Szymon Jaroszewicz, Krzysztof Rudaś
 Design goals
 ------------
 
-The design goal of ``uplift-sklearn`` is to seamlessly integrate with ``scikit-learn`` (https://www.scikit-learn.org) and follow its conventions as closely as possible. It is possible to use model evaluation and tuning facilities from ``scikit-learn`` either directly or as thin wrappers provided by ``uplift-sklearn``.
+The design goal of ``libuplift`` is to seamlessly integrate with ``scikit-learn`` (https://www.scikit-learn.org) and follow its conventions as closely as possible. It is possible to use model evaluation and tuning facilities from ``scikit-learn`` either directly or as thin wrappers provided by ``libuplift``.
 
 Features
 --------
@@ -41,17 +49,17 @@ Features
 Getting started
 ---------------
 
-To install ``uplift-sklearn`` simply use:
+To install ``libuplift`` simply use:
 
 .. code-block:: shell
 
-    pip install uplift-sklearn
+    pip install libuplift
 
 or to get the latest version install directly from Github:
 
 .. code-block:: shell
 
-    pip install git+https://github.com/jszymon/uplift-sklearn
+    pip install git+https://github.com/jszymon/libuplift
 
 Let us now build an uplift model on the well known Hillstrom dataset. Begin with the necessary imports:
 
@@ -81,7 +89,7 @@ Now fetch the dataset and do basic preprocessing:
     y = D.target_visit[mask]
     trt = (trt[mask] == 2)*1
 
-By ``uplift-sklearn`` convention, treatments are denoted by successive integers with 0 indicating controls. Additionally the special ``n_trt`` argument is passed to all methods to indicate the number of treatments (if ``n_trt`` is ``None`` it will be inferred automatically, but this may be unreliable and is discouraged).
+By ``libuplift`` convention, treatments are denoted by successive integers with 0 indicating controls. Additionally the special ``n_trt`` argument is passed to all methods to indicate the number of treatments (if ``n_trt`` is ``None`` it will be inferred automatically, but this may be unreliable and is discouraged).
 
 Now, we're ready to fit an uplift model (TLearner in our case):
 
@@ -110,7 +118,7 @@ and draw an uplift curve:
 
    An uplift curve
 
-One can use ``cross_val_score`` and ``GridSearchCV`` to easily evaluate models or tune their parameters, just as one does in ``scikit-learn``. The functions provided by ``uplift-sklearn`` are thin wrappers of original ``scikit-learn`` functions so they behave exactly the same as they would for standard classifiers.
+One can use ``cross_val_score`` and ``GridSearchCV`` to easily evaluate models or tune their parameters, just as one does in ``scikit-learn``. The functions provided by ``libuplift`` are thin wrappers of original ``scikit-lelearn`` functions so they behave exactly the same as they would for standard classifiers.
 
 .. code-block:: python
 
