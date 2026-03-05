@@ -82,7 +82,7 @@ plt.plot([0,1], [0,cy[-1]], "k-")
 plt.show()
 ```
 
-![An uplift curve](assets/images/uplift_curve.png)
+![An uplift curve](_assets/images/uplift_curve.png)
 
 One can use `cross_val_score` and `GridSearchCV` to easily evaluate
 models or tune their parameters, just as one does in `scikit-learn`.
@@ -153,7 +153,7 @@ ax1.set_title("Learning curve")
 plt.show()
 ```
 
-![An uplift curve](assets/images/model_eval.png)
+![An uplift curve](_assets/images/model_eval.png)
 
 We can see that the model is significantly better than random guessing and optimal performance seems to be achieved aleady with 10000 training records.
 

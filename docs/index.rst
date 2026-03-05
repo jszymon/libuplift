@@ -96,7 +96,7 @@ and draw an uplift curve:
     plt.plot([0,1], [0,cy[-1]], "k-")
     plt.show()
 
-.. figure:: ../assets/images/uplift_curve.png
+.. figure:: ../_assets/images/uplift_curve.png
    :alt: An uplift curve
 
    An uplift curve
@@ -167,7 +167,7 @@ Finally, do a permutation test and draw a learning curve. Again the functions be
     ax1.set_title("Learning curve")
     plt.show()
 
-.. figure:: ../assets/images/model_eval.png
+.. figure:: ../_assets/images/model_eval.png
    :alt: Permutation test and learning curve plots
 
    Model evaluation plots: Permutation test (left) and Learning curve (right).
