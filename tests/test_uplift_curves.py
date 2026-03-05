@@ -1,4 +1,4 @@
-from usklearn.metrics import uplift_curve
+from libuplift.metrics import uplift_curve
 
 import numpy as np
 

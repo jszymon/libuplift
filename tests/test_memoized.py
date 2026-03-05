@@ -1,6 +1,6 @@
 from sklearn.linear_model import LinearRegression
 
-from usklearn.classifiers import MemoizedClassifier
+from libuplift.classifiers import MemoizedClassifier
 
 def test_memoized_classifier(tmp_path):
     cache = tmp_path / "cache"

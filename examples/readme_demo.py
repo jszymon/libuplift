@@ -12,12 +12,12 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
 
-from usklearn.meta import TLearnerUpliftClassifier
+from libuplift.meta import TLearnerUpliftClassifier
 
 
 ### fetch and prepare data
 
-from usklearn.datasets import fetch_Hillstrom
+from libuplift.datasets import fetch_Hillstrom
 D = fetch_Hillstrom(as_frame=True)
 trt = D.treatment
 # encode categorical features, standardize numerical features
@@ -39,7 +39,7 @@ m = TLearnerUpliftClassifier(base_estimator=LogisticRegression())
 m.fit(X_train, y_train, trt_train, n_trt=1)
 
 import matplotlib.pyplot as plt
-from usklearn.metrics import uplift_curve, area_under_uplift_curve
+from libuplift.metrics import uplift_curve, area_under_uplift_curve
 
 score = m.predict(X_test)[:,1]
 print("AUUC=", area_under_uplift_curve(y_test, score, trt_test, n_trt=1))
@@ -51,9 +51,9 @@ plt.show()
 
 ### tune model parameters using crossvalidation
 
-# import those from usklearn instead of sklearn
-from usklearn.model_selection import cross_val_score
-from usklearn.model_selection import GridSearchCV
+# import those from libuplift instead of sklearn
+from libuplift.model_selection import cross_val_score
+from libuplift.model_selection import GridSearchCV
 
 m1 = TLearnerUpliftClassifier(base_estimator=LogisticRegression())
 m_cv1 = GridSearchCV(m1,
@@ -82,7 +82,7 @@ print("best params: ", m_cv1.best_params_)
 
 # those functions are thin wrappers around original sklearn functions,
 # so they accept the same set of parameters
-from usklearn.model_selection import permutation_test_score, learning_curve
+from libuplift.model_selection import permutation_test_score, learning_curve
 
 score, permutation_scores, pv =\
     permutation_test_score(m, X, y, trt, n_trt=1, cv=3,

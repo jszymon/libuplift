@@ -138,7 +138,7 @@ def get_uplift_scorer(scoring):
         except KeyError:
             raise ValueError(
                 "%r is not a valid uplift scoring value. "
-                "Use usklearn.metrics.get_uplift_scorer_names() "
+                "Use libuplift.metrics.get_uplift_scorer_names() "
                 "to get valid options." % scoring
             )
     else:
@@ -178,9 +178,9 @@ def check_uplift_scoring(estimator, scoring=None, *, allow_none=False):
         module = getattr(scoring, "__module__", None)
         if (
             hasattr(module, "startswith")
-            and module.startswith("usklearn.metrics.")
-            and not module.startswith("usklearn.metrics._scorer")
-            and not module.startswith("usklearn.metrics.tests.")
+            and module.startswith("libuplift.metrics.")
+            and not module.startswith("libuplift.metrics._scorer")
+            and not module.startswith("libuplift.metrics.tests.")
         ):
             raise ValueError(
                 "scoring value %r looks like it is a metric "
@@ -203,7 +203,7 @@ def check_uplift_scoring(estimator, scoring=None, *, allow_none=False):
     elif isinstance(scoring, Iterable):
         raise ValueError(
             "For evaluating multiple scores, use "
-            "usklearn.model_selection.cross_validate instead. "
+            "libuplift.model_selection.cross_validate instead. "
             "{0} was passed.".format(scoring)
         )
     else:
@@ -287,7 +287,7 @@ _UPLIFT_SCORERS = dict(
 
 def get_uplift_scorer_names():
     """Get the names of all available scorers.
-    These names can be passed to :func:`~usklearn.metrics.get_uplift_scorer` to
+    These names can be passed to :func:`~libuplift.metrics.get_uplift_scorer` to
     retrieve the scorer object.
     Returns
     -------

@@ -10,12 +10,12 @@ import numpy as np
 
 from sklearn.linear_model import Ridge
 
-from usklearn.datasets import fetch_Hillstrom
-from usklearn.meta import MultimodelUpliftRegressor
-from usklearn.meta import MultimodelUpliftLinearRegressor
-from usklearn.metrics import e_sate, e_satt
-from usklearn.model_selection import cross_validate, cross_val_score
-from usklearn.model_selection import GridSearchCV
+from libuplift.datasets import fetch_Hillstrom
+from libuplift.meta import MultimodelUpliftRegressor
+from libuplift.meta import MultimodelUpliftLinearRegressor
+from libuplift.metrics import e_sate, e_satt
+from libuplift.model_selection import cross_validate, cross_val_score
+from libuplift.model_selection import GridSearchCV
 
 def encode_features(D):
     """Convert features to float matrix.
@@ -104,5 +104,5 @@ print("training SATT:", e_satt(y, rr2.predict(X), trt))
 print("crossval SATE:", cross_val_score(rr2, X, y, trt, n_trt=1, cv=10, n_jobs=-1))
 
 # permutation test
-from usklearn.model_selection import permutation_test_score
+from libuplift.model_selection import permutation_test_score
 print(permutation_test_score(r, X, y, trt, n_trt=1, cv=3, n_permutations=100, n_jobs=-1))

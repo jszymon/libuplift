@@ -47,7 +47,7 @@ extensions = [
     'numpydoc'
 ]
 #autosummary_generate = True
-autoapi_dirs = ['../usklearn']
+autoapi_dirs = ['../libuplift']
 autoapi_options = ['members',
                    'undoc-members',
                    #'private-members',
@@ -56,7 +56,7 @@ autoapi_options = ['members',
                    'special-members',
                    #'imported-members',
                    ]
-autoapi_ignore = ['*_data*', '*robinson*', '*pipeline*', '*preprocessing*']
+autoapi_ignore = ['*_data*', '*robinson*', '*pipeline*', '*preprocessing*', '*tree*']
 def skip_members_hook(app, what, name, obj, skip, options):
     if "ARCHIVE" in name:
         skip = True

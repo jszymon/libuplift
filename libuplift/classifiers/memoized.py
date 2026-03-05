@@ -22,7 +22,7 @@ class MemoizedClassifier(BaseEstimator):
     prefitted model.
 
     memory is either a path or a joblib.Memory object.  If None a
-    default path is used: "usklearn_cache" in systems default
+    default path is used: "libuplift_cache" in systems default
     temporary directory.
 
     Parameters
@@ -41,7 +41,7 @@ class MemoizedClassifier(BaseEstimator):
     def fit(self, *args, **kwargs):
         memory = self.memory
         if memory is None:
-            memory = os.path.join(gettempdir(), "usklearn_cache")
+            memory = os.path.join(gettempdir(), "libuplift_cache")
         self.memory_ = check_memory(memory)
         if not hasattr(self, "do_fit_cached_"):
             self.do_fit_cached_ = self.memory_.cache(_do_fit, ignore=["estimator"])

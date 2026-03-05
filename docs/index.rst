@@ -1,12 +1,5 @@
-=======
-.. libuplift documentation master file, created by
-   sphinx-quickstart on Thu Jul 11 14:45:25 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to libuplift's documentation!
 =====================================
-==========================================
 
 .. toctree::
    :maxdepth: 1
@@ -15,20 +8,10 @@ Welcome to libuplift's documentation!
    autoapi/index
 
 
-uplift-sklearn is an uplift modeling package based on and integrated with ``scikit-learn``.
-=======
-.. libuplift documentation master file, created by
-   sphinx-quickstart on Thu Dec 11 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 libuplift
 =========
 
 libuplift is an uplift modeling package based on and integrated with ``scikit-learn``.
-==============
-
-uplift-sklearn is an uplift modeling package based on and integrated with ``scikit-learn``.
 
 Authors: Szymon Jaroszewicz, Krzysztof Rudaś
 
@@ -76,7 +59,7 @@ Now fetch the dataset and do basic preprocessing:
 
 .. code-block:: python
 
-    from usklearn.datasets import fetch_Hillstrom
+    from libuplift.datasets import fetch_Hillstrom
     D = fetch_Hillstrom(as_frame=True)
     trt = D.treatment
     # encode categorical features, standardize numerical features
@@ -104,7 +87,7 @@ and draw an uplift curve:
 .. code-block:: python
 
     import matplotlib.pyplot as plt
-    from usklearn.metrics import uplift_curve, area_under_uplift_curve
+    from libuplift.metrics import uplift_curve, area_under_uplift_curve
 
     score = m.predict(X_test)[:,1]
     print("AUUC=", area_under_uplift_curve(y_test, score, trt_test, n_trt=1))
@@ -122,9 +105,9 @@ One can use ``cross_val_score`` and ``GridSearchCV`` to easily evaluate models o
 
 .. code-block:: python
 
-    # import those from usklearn instead of sklearn
-    from usklearn.model_selection import cross_val_score
-    from usklearn.model_selection import GridSearchCV
+    # import those from libuplift instead of sklearn
+    from libuplift.model_selection import cross_val_score
+    from libuplift.model_selection import GridSearchCV
 
     m1 = TLearnerUpliftClassifier(base_estimator=LogisticRegression())
     m_cv1 = GridSearchCV(m1,
@@ -151,7 +134,7 @@ Finally, do a permutation test and draw a learning curve. Again the functions be
 
 .. code-block:: python
 
-    from usklearn.model_selection import permutation_test_score, learning_curve
+    from libuplift.model_selection import permutation_test_score, learning_curve
 
     score, permutation_scores, pv =\\
         permutation_test_score(m, X, y, trt, n_trt=1, cv=3,

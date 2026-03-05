@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 
 from sklearn.linear_model import Ridge
 
-from usklearn.datasets import fetch_Lalonde, fetch_Hillstrom
-from usklearn.meta import MultimodelUpliftRegressor
-from usklearn.model_selection import (cross_val_score,
+from libuplift.datasets import fetch_Lalonde, fetch_Hillstrom
+from libuplift.meta import MultimodelUpliftRegressor
+from libuplift.model_selection import (cross_val_score,
                                       cross_val_predict,
                                       permutation_test_score,
                                       learning_curve)

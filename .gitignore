@@ -107,4 +107,4 @@ venv.bak/
 .mypy_cache/
 
 # uatomatically generated Sphinx documentation
-usklearn*.rst
+libuplift*.rst

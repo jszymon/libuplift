@@ -15,24 +15,24 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from usklearn.datasets import fetch_Hillstrom
-from usklearn.meta import MultimodelUpliftRegressor
-from usklearn.meta import MultimodelUpliftClassifier
-from usklearn.meta import TreatmentUpliftClassifier
-from usklearn.meta import ResponseUpliftClassifier
-from usklearn.meta import ControlUpliftClassifier
-from usklearn.meta import TargetTransformUpliftRegressor
-from usklearn.meta import TargetTransformUpliftClassifier
-from usklearn.meta import SLearnerUpliftRegressor
-from usklearn.meta import SLearnerUpliftClassifier
-from usklearn.meta import NestedMeanUpliftRegressor
-from usklearn.meta import DDRUpliftClassifier
-from usklearn.meta import XLearnerUpliftRegressor
+from libuplift.datasets import fetch_Hillstrom
+from libuplift.meta import MultimodelUpliftRegressor
+from libuplift.meta import MultimodelUpliftClassifier
+from libuplift.meta import TreatmentUpliftClassifier
+from libuplift.meta import ResponseUpliftClassifier
+from libuplift.meta import ControlUpliftClassifier
+from libuplift.meta import TargetTransformUpliftRegressor
+from libuplift.meta import TargetTransformUpliftClassifier
+from libuplift.meta import SLearnerUpliftRegressor
+from libuplift.meta import SLearnerUpliftClassifier
+from libuplift.meta import NestedMeanUpliftRegressor
+from libuplift.meta import DDRUpliftClassifier
+from libuplift.meta import XLearnerUpliftRegressor
 
-from usklearn.classifiers import MemoizedClassifier
+from libuplift.classifiers import MemoizedClassifier
 
-from usklearn.metrics import uplift_curve, uplift_curve_j
-from usklearn.model_selection import cross_validate, cross_val_score, uplift_check_cv
+from libuplift.metrics import uplift_curve, uplift_curve_j
+from libuplift.model_selection import cross_validate, cross_val_score, uplift_check_cv
 
 import matplotlib.pyplot as plt
 

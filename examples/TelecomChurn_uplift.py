@@ -15,17 +15,17 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
-from usklearn.datasets import fetch_TelecomChurn
-from usklearn.meta import MultimodelUpliftRegressor
-from usklearn.meta import MultimodelUpliftClassifier
-from usklearn.meta import TreatmentUpliftClassifier
-from usklearn.meta import ResponseUpliftClassifier
-from usklearn.meta import ControlUpliftClassifier
-from usklearn.meta import TargetTransformUpliftRegressor
-from usklearn.meta import TargetTransformUpliftClassifier
+from libuplift.datasets import fetch_TelecomChurn
+from libuplift.meta import MultimodelUpliftRegressor
+from libuplift.meta import MultimodelUpliftClassifier
+from libuplift.meta import TreatmentUpliftClassifier
+from libuplift.meta import ResponseUpliftClassifier
+from libuplift.meta import ControlUpliftClassifier
+from libuplift.meta import TargetTransformUpliftRegressor
+from libuplift.meta import TargetTransformUpliftClassifier
 
-from usklearn.metrics import uplift_curve
-from usklearn.model_selection import cross_validate, cross_val_score, uplift_check_cv
+from libuplift.metrics import uplift_curve
+from libuplift.model_selection import cross_validate, cross_val_score, uplift_check_cv
 
 import matplotlib.pyplot as plt
 

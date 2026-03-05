@@ -4,7 +4,7 @@ import numpy as np
 
 from sklearn.linear_model import LogisticRegression
 
-from usklearn.classifiers import ClassifierAsRegressor
+from libuplift.classifiers import ClassifierAsRegressor
 
 def _make_data():
     X = [[1.0], [1], [1], [0], [0], [0]]

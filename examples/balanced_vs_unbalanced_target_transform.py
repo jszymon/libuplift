@@ -7,9 +7,9 @@ np.random.seed(123)
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from usklearn.datasets import fetch_Hillstrom
-from usklearn.meta import TargetTransformUpliftClassifier
-from usklearn.model_selection import cross_val_score
+from libuplift.datasets import fetch_Hillstrom
+from libuplift.meta import TargetTransformUpliftClassifier
+from libuplift.model_selection import cross_val_score
 
 D = fetch_Hillstrom(as_frame=True)
 

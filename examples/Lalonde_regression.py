@@ -10,12 +10,12 @@ import numpy as np
 
 from sklearn.linear_model import Ridge
 
-from usklearn.datasets import fetch_Lalonde
-from usklearn.meta import MultimodelUpliftRegressor
-from usklearn.meta import MultimodelUpliftLinearRegressor
-from usklearn.metrics import e_sate, e_satt
-from usklearn.model_selection import cross_validate, cross_val_score
-from usklearn.model_selection import GridSearchCV
+from libuplift.datasets import fetch_Lalonde
+from libuplift.meta import MultimodelUpliftRegressor
+from libuplift.meta import MultimodelUpliftLinearRegressor
+from libuplift.metrics import e_sate, e_satt
+from libuplift.model_selection import cross_validate, cross_val_score
+from libuplift.model_selection import GridSearchCV
 
 DA = fetch_Lalonde("A")
 print(DA.data.shape)

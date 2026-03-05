@@ -1,5 +1,5 @@
 """
-The :mod:`usklearn.utils` module includes various utilities.
+The :mod:`libuplift.utils` module includes various utilities.
 """
 
 from .validation import check_trt

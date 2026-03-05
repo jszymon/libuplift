@@ -1,5 +1,5 @@
 """
-The :mod:`usklearn.model_selection._search` includes utilities to fine-tune the
+The :mod:`libuplift.model_selection._search` includes utilities to fine-tune the
 parameters of an estimator.
 """
 

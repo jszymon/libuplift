@@ -1,6 +1,6 @@
 import numpy as np
 
-from usklearn.metrics.bins import iter_quantiles
+from libuplift.metrics.bins import iter_quantiles
 
 def test_iter_quantiles():
     trt =    np.array([0,0,0,0,0, 1,1,1,1,1])

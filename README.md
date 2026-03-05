@@ -44,7 +44,7 @@ from sklearn.linear_model import LogisticRegression
 Now fetch the dataset and do basic preprocessing
 
 ``` Python
-from usklearn.datasets import fetch_Hillstrom
+from libuplift.datasets import fetch_Hillstrom
 D = fetch_Hillstrom(as_frame=True)
 trt = D.treatment
 # encode categorical features, standardize numerical features
@@ -72,7 +72,7 @@ and draw an uplift curve
 
 ``` Python
 import matplotlib.pyplot as plt
-from usklearn.metrics import uplift_curve, area_under_uplift_curve
+from libuplift.metrics import uplift_curve, area_under_uplift_curve
 
 score = m.predict(X_test)[:,1]
 print("AUUC=", area_under_uplift_curve(y_test, score, trt_test, n_trt=1))
@@ -91,9 +91,9 @@ original `scikit-learn` functions so they behave exactly the same as
 they would for standard classifiers.
 
 ``` Python
-# import those from usklearn instead of sklearn
-from usklearn.model_selection import cross_val_score
-from usklearn.model_selection import GridSearchCV
+# import those from libuplift instead of sklearn
+from libuplift.model_selection import cross_val_score
+from libuplift.model_selection import GridSearchCV
 
 m1 = TLearnerUpliftClassifier(base_estimator=LogisticRegression())
 m_cv1 = GridSearchCV(m1,
@@ -119,7 +119,7 @@ print("crossval AUUC m2:", auuc_m2)
 Finally, do a permutation test and draw a learning curve.  Again the functions below are thin wrappers of original `scikit-learn` functions so they accept the same set of parameters.
 
 ``` Python
-from usklearn.model_selection import permutation_test_score, learning_curve
+from libuplift.model_selection import permutation_test_score, learning_curve
 
 score, permutation_scores, pv =\
     permutation_test_score(m, X, y, trt, n_trt=1, cv=3,

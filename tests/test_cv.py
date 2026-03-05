@@ -2,7 +2,7 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-from usklearn.utils.multi_array import MultiArray
+from libuplift.utils.multi_array import MultiArray
 
 def _prepare_data():
     n = 100
