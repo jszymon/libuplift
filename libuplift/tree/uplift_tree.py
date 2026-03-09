@@ -15,24 +15,24 @@ from ..utils.validation import check_trt, check_consistent_length
 class UpliftTreeNode:
     """Node in the uplift tree."""
     
-    def __init__(self, feature_idx=None, threshold=None, left=None, right=None,
-                 trt_y_ct=None, gain=None,
-                 value=None):
-        self.feature_idx = feature_idx  # Feature index for splitting
-        self.threshold = threshold      # Threshold for splitting
-        self.left = left                # Left child (samples <= threshold)
-        self.right = right              # Right child (samples > threshold)
-        self.trt_y_ct = trt_y_ct        # Treatment x y contingency table
-        self.gain = gain                # Split gain for the node
+    def __init__(self, feature_idx=None, threshold=None,
+                 left=None, right=None,
+                 trt_y_ct=None, gain=None):
+        self.feature_idx = feature_idx  # feature index for splitting
+        self.threshold = threshold      # threshold for splitting
+        self.left = left                # left child (samples <= threshold)
+        self.right = right              # right child (samples > threshold)
+        self.trt_y_ct = trt_y_ct        # treatment x y contingency table
+        self.gain = gain                # split gain for the node
         # computed attributes
-        # Array of sample counts per treatment group
+        # array of sample counts per treatment group
         self.n_samples_per_treatment = self.trt_y_ct.sum(axis=1)
-        # Number of samples in this node
+        # number of samples in this node
         self.n_samples = self.n_samples_per_treatment.sum()
         # response probabilities per treatment
         with np.errstate(divide='ignore', invalid="ignore"):
             self.resp_P = self.trt_y_ct / self.n_samples_per_treatment.reshape(-1,1)
-        # Uplift value if leaf node
+        # uplift value if leaf node
         ctrl_P = self.resp_P[0]
         if self.trt_y_ct.shape[0] == 2: # single treatment
             self.uplift = self.resp_P[1] - ctrl_P
@@ -47,8 +47,10 @@ class UpliftTreeNode:
 class UpliftTreeBase(BaseEstimator):
     """Base class for proper uplift trees with recursive partitioning."""
     
-    def __init__(self, max_depth=None, min_samples_split=2, min_samples_leaf=10,
-                 min_weight_fraction_leaf=0.0, max_features=None, random_state=None):
+    def __init__(self, splitting_criterion="E", max_depth=None,
+                 min_samples_split=100, min_samples_leaf=100,
+                 min_weight_fraction_leaf=None, max_features=None, random_state=None):
+        self.splitting_criterion = splitting_criterion
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
@@ -73,6 +75,8 @@ class UpliftTreeBase(BaseEstimator):
             check_consistent_length(X, y, trt, sample_weight)
         self._set_fit_params(y, trt, n_trt)
 
+        self._check_splitting_criterion(self.splitting_criterion)
+
         # Store feature information
         self.n_features_in_ = X.shape[1]
         if hasattr(X, 'columns'):
@@ -90,13 +94,12 @@ class UpliftTreeBase(BaseEstimator):
                 self.max_features_ = n_features
         else:
             self.max_features_ = None
-            
 
         # Build the tree using recursive partitioning
         self.tree_ = self._build_tree(X, y, trt, sample_weight, depth=0)
         
         return self
-        
+
     def _build_tree(self, X, y, trt, sample_weight, depth, trt_y_ct=None):
         """Recursively build the uplift tree."""
         n_samples = X.shape[0]
@@ -152,7 +155,7 @@ class UpliftTreeBase(BaseEstimator):
 
     def _find_best_split(self, X, y, trt, sample_weight):
         """Find the best split that maximizes uplift."""
-        best_uplift_gain = -np.inf
+        best_gain = -np.inf
         best_split = None
         best_left_ct = None
         best_right_ct = None
@@ -190,33 +193,48 @@ class UpliftTreeBase(BaseEstimator):
             # if no splits can be valid skip feature
             if (~x_diff_mask).all():
                 continue
+          
+            gain = self._compute_gain(trt_y_cum, n_cum_per_trt)
+            gain[x_diff_mask] = -np.inf
 
-            # Cumulative probabilities
-            with np.errstate(divide='ignore', invalid="ignore"):
-                P_cum_left = trt_y_cum / n_cum_per_trt.reshape(-1, self.n_trt_+1 ,1)
-                P_cum_right = (trt_y_cum[-1] - trt_y_cum) / (n_cum_per_trt[-1] - n_cum_per_trt).reshape(-1, self.n_trt_+1, 1)
-                #P_cum_right_new = (trt_y_cum[-1] - trt_y_cum) / (trt_y_cum[-1] - trt_y_cum).sum(axis=2).reshape(-1, self.n_trt_+1, 1)
-                #print(np.nanmax(np.abs(P_cum_right - P_cum_right_new)))
-            
-            # Delta Delta P
-            dP = np.abs((P_cum_left[:,1,1] - P_cum_left[:,0,1]) - (P_cum_right[:,1,1] - P_cum_right[:,0,1]))
-            dP[x_diff_mask] = -np.inf
-
-            best_i = np.nanargmax(dP)
-            uplift_gain = dP[best_i]
+            best_i = np.nanargmax(gain)
+            gain_i = gain[best_i]
             threshold = (x_sorted[best_i] + x_sorted[best_i+1]) / 2
             left_ct = trt_y_cum[best_i]
             right_ct = trt_y_cum[-1] - left_ct
             
-            if uplift_gain > best_uplift_gain:
-                best_uplift_gain = uplift_gain
+            if gain_i > best_gain:
+                best_gain = gain_i
                 best_split = (feature_idx, threshold)
                 best_left_ct = left_ct
                 best_right_ct = right_ct
                 
-        return best_split, best_uplift_gain, best_left_ct, best_right_ct
+        return best_split, best_gain, best_left_ct, best_right_ct
 
-        
+    def _compute_gain(self, trt_y_cum, n_cum_per_trt):
+        # Cumulative outcome  probabilities used by all measures
+        with np.errstate(divide='ignore', invalid="ignore"):
+            P_cum_left = trt_y_cum / n_cum_per_trt.reshape(-1, self.n_trt_+1 ,1)
+            P_cum_right = (trt_y_cum[-1] - trt_y_cum) / (n_cum_per_trt[-1] - n_cum_per_trt).reshape(-1, self.n_trt_+1, 1)
+            #P_cum_right_new = (trt_y_cum[-1] - trt_y_cum) / (trt_y_cum[-1] - trt_y_cum).sum(axis=2).reshape(-1, self.n_trt_+1, 1)
+        if self.splitting_criterion == "DeltaDeltaP":
+            if self.n_trt_ == 1 and self.n_classes_ == 1:
+                gain = np.abs((P_cum_left[:,1,1] - P_cum_left[:,0,1])
+                              - (P_cum_right[:,1,1] - P_cum_right[:,0,1]))
+            else:
+                gain = np.max(np.abs((P_cum_left[:,1:,:] - P_cum_left[:,:1,:])
+                                     - (P_cum_right[:,1:,:] - P_cum_right[:,:1,:])), axis=(1,2))
+        elif self.splitting_criterion == "E":
+            D_left = np.square(P_cum_left[:,1:,:] - P_cum_left[:,:1,:]).sum(axis=(1,2))
+            D_right = np.square(P_cum_right[:,1:,:] - P_cum_right[:,:1,:]).sum(axis=(1,2))
+            n_cum = n_cum_per_trt.sum(axis=1)
+            P_avg_left_cum = n_cum / n_cum[-1]
+            P_avg_right_cum = 1 - P_avg_left_cum
+            gain = P_avg_left_cum * D_left + P_avg_right_cum * D_right
+        else:
+            raise NotImplementedError()
+        return gain
+
     def _calculate_trt_y_ct(self, y, trt, sample_weight=None):
         """Calculate treatment x outcome contingency table."""
         trt_y_ct = []
@@ -256,6 +274,11 @@ class UpliftTreeClassifier(UpliftTreeBase, UpliftClassifierMixin):
         
         return np.array(predictions)
 
+    def _check_splitting_criterion(self, criterion):
+        if criterion not in ["DeltaDeltaP", "E", "KL", "Chi2"]:
+            raise ValueError(f"UpliftTreeClassifier: wrong spliting criterion"
+                             f" {criterion}. Available criteria: DeltaDeltaP,"
+                             f" E, KL, Chi2")
 
 # class UpliftTreeRegressor(UpliftTreeBase, UpliftRegressorMixin):
 #     """Uplift Tree Regressor with proper recursive partitioning."""
