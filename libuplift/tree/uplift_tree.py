@@ -1,16 +1,16 @@
-"""Proper Uplift Tree implementation with recursive partitioning.
-
-This implementation follows the Rzepakowski and Jaroszewicz algorithm for uplift trees
-that actually performs recursive partitioning to maximize uplift at each split.
+"""Uplift Tree implementation with recursive partitioning.
 """
 
 import numpy as np
+#from scipy.stats import entropy # too slow!
+from scipy.special import rel_entr
+
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.tree._tree import Tree
+
 from ..base import UpliftClassifierMixin, UpliftRegressorMixin
 from ..utils.validation import check_trt, check_consistent_length
-
 
 class UpliftTreeNode:
     """Node in the uplift tree."""
@@ -224,9 +224,13 @@ class UpliftTreeBase(BaseEstimator):
             else:
                 gain = np.max(np.abs((P_cum_left[:,1:,:] - P_cum_left[:,:1,:])
                                      - (P_cum_right[:,1:,:] - P_cum_right[:,:1,:])), axis=(1,2))
-        elif self.splitting_criterion == "E":
-            D_left = np.square(P_cum_left[:,1:,:] - P_cum_left[:,:1,:]).sum(axis=(1,2))
-            D_right = np.square(P_cum_right[:,1:,:] - P_cum_right[:,:1,:]).sum(axis=(1,2))
+        elif self.splitting_criterion in ["E", "KL", "Chi2"]:
+            if self.splitting_criterion == "E":
+                D_left  = np.square(P_cum_left[:,1:,:] - P_cum_left[:,:1,:]).sum(axis=(1,2))
+                D_right = np.square(P_cum_right[:,1:,:] - P_cum_right[:,:1,:]).sum(axis=(1,2))
+            if self.splitting_criterion == "KL":
+                D_left  = rel_entr(P_cum_left[:,1:], P_cum_left[:,:1]).sum(axis=(1,2))
+                D_right = rel_entr(P_cum_right[:,1:], P_cum_right[:,:1]).sum(axis=(1,2))
             n_cum = n_cum_per_trt.sum(axis=1)
             P_avg_left_cum = n_cum / n_cum[-1]
             P_avg_right_cum = 1 - P_avg_left_cum
