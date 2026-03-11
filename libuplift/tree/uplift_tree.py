@@ -228,6 +228,17 @@ class UpliftTreeBase(BaseEstimator):
             if self.splitting_criterion == "E":
                 D_left  = np.square(P_cum_left[:,1:,:] - P_cum_left[:,:1,:]).sum(axis=(1,2))
                 D_right = np.square(P_cum_right[:,1:,:] - P_cum_right[:,:1,:]).sum(axis=(1,2))
+            if self.splitting_criterion == "Chi2":
+                mask_left = (P_cum_left[:,:1,:] != 0)
+                D_left  = np.square(P_cum_left[:,1:,:] - P_cum_left[:,:1,:])
+                D_left[mask_left] /= P_cum_left[:,:1,:][mask_left]
+                D_left[~mask_left] = np.inf
+                D_left = D_left.sum(axis=(1,2))
+                mask_right = (P_cum_right[:,:1,:] != 0)
+                D_right = np.square(P_cum_right[:,1:,:] - P_cum_right[:,:1,:])
+                D_right[mask_right] /= P_cum_right[:,:1,:][mask_right]
+                D_right[~mask_right] = np.inf
+                D_right = D_right.sum(axis=(1,2))
             if self.splitting_criterion == "KL":
                 D_left  = rel_entr(P_cum_left[:,1:], P_cum_left[:,:1]).sum(axis=(1,2))
                 D_right = rel_entr(P_cum_right[:,1:], P_cum_right[:,:1]).sum(axis=(1,2))
