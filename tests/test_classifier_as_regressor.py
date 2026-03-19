@@ -12,7 +12,7 @@ def _make_data():
     return X, y
     
 def test_classifier_as_regressor():
-    lr = LogisticRegression(penalty=None)
+    lr = LogisticRegression(C=np.inf)
     lr_reg = ClassifierAsRegressor(lr)
     X, y = _make_data()
     lr_reg.fit(X, y)
@@ -22,7 +22,7 @@ def test_classifier_as_regressor():
     assert pred_y[3:] == approx(1/3, abs=1e-3)
 
 def test_classifier_as_regressor_pos_label():
-    lr = LogisticRegression(penalty=None)
+    lr = LogisticRegression(C=np.inf)
     lr_reg = ClassifierAsRegressor(lr, pos_label=0)
     X, y = _make_data()
     lr_reg.fit(X, y)
@@ -32,7 +32,7 @@ def test_classifier_as_regressor_pos_label():
     assert pred_y[3:] == approx(2/3, abs=1e-3)
 
 def test_classifier_as_regressor_log_proba():
-    lr = LogisticRegression(penalty=None)
+    lr = LogisticRegression(C=np.inf)
     lr_reg = ClassifierAsRegressor(lr, response_method="predict_log_proba")
     X, y = _make_data()
     lr_reg.fit(X, y)
@@ -42,7 +42,7 @@ def test_classifier_as_regressor_log_proba():
     assert pred_y[3:] == approx(np.log(1/3), abs=1e-3)
 
 def test_classifier_as_regressor_decision_function():
-    lr = LogisticRegression(penalty=None)
+    lr = LogisticRegression(C=np.inf)
     lr_reg = ClassifierAsRegressor(lr, response_method="decision_function")
     X, y = _make_data()
     lr_reg.fit(X, y)
