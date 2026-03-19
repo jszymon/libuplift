@@ -7,7 +7,7 @@ By default return predicted probabilities as numeric predictions.
 
 from sklearn.base import BaseEstimator, RegressorMixin
 
-class ClassifierAsRegressor(BaseEstimator, RegressorMixin):
+class ClassifierAsRegressor(RegressorMixin, BaseEstimator):
     """Wraps a classifier such that it behaves like a regressor.
 
     The predict method returns by default predicted probability for

@@ -50,6 +50,7 @@ class UpliftTreeBase(BaseEstimator):
     def __init__(self, splitting_criterion="E", max_depth=None,
                  min_samples_split=100, min_samples_leaf=100,
                  min_weight_fraction_leaf=None, max_features=None, random_state=None):
+        super().__init__()
         self.splitting_criterion = splitting_criterion
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
@@ -273,7 +274,7 @@ class UpliftTreeBase(BaseEstimator):
         else:
             return self._predict_sample(x, node.right)
     
-class UpliftTreeClassifier(UpliftTreeBase, UpliftClassifierMixin):
+class UpliftTreeClassifier(UpliftClassifierMixin, UpliftTreeBase):
     """Uplift Tree Classifier with proper recursive partitioning."""
     
     def predict(self, X):
