@@ -22,3 +22,4 @@ from .BMT import fetch_BMT
 from .Tamoxifen import fetch_Tamoxifen
 from .pbc import fetch_pbc
 from .uis import fetch_uis
+from .tDCS import fetch_tDCS
