@@ -73,8 +73,8 @@ def fetch_Criteo(data_home=None, download_if_missing=True,
     dataset.target_conversion : numpy array
         Each value is 1 if purchase occurred 0 otherwise.
 
-    dataset.target_spend : numpy array
-        Each value corresponds to the amount of money spent.
+    dataset.target_exposure : numpy array
+        Whether the user has been exposed to the ad
 
     dataset.DESCR : string
         Description of the dataset.
