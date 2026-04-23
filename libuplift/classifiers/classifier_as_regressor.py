@@ -5,9 +5,15 @@ By default return predicted probabilities as numeric predictions.
 """
 
 
-from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.base import BaseEstimator, MetaEstimatorMixin, RegressorMixin
+from sklearn.base import clone
+from sklearn.utils.metadata_routing import (
+    MetadataRouter,
+    MethodMapping,
+    get_routing_for_object,
+)
 
-class ClassifierAsRegressor(RegressorMixin, BaseEstimator):
+class ClassifierAsRegressor(MetaEstimatorMixin, RegressorMixin, BaseEstimator):
     """Wraps a classifier such that it behaves like a regressor.
 
     The predict method returns by default predicted probability for
@@ -39,7 +45,7 @@ class ClassifierAsRegressor(RegressorMixin, BaseEstimator):
         self.response_method = response_method
         self.pos_label = pos_label
     def fit(self, *args, **kwargs):
-        self.fitted_estimator_ = self.estimator.fit(*args, **kwargs)
+        self.fitted_estimator_ = clone(self.estimator).fit(*args, **kwargs)
         return self
     def predict(self, *args, **kwargs):
         resp_method = getattr(self.fitted_estimator_, self.response_method)
@@ -47,18 +53,7 @@ class ClassifierAsRegressor(RegressorMixin, BaseEstimator):
         pred_ndim = len(preds.shape)
         if pred_ndim > 2:
             raise RuntimeError("ClassifierAsRegressor: response method"
-                               " must return a vector of a matrix.")
+                               " must return a vector or a matrix.")
         elif pred_ndim == 2:
             preds = preds[:,self.pos_label]
         return preds
-
-    def __getattr__(self, name):
-        if name in ["fitted_estimator_", "response_method", "pos_label"]:
-            try:
-                return self.__dict__[name]
-            except:
-                raise AttributeError(f"ClassifierAsRegressor has"
-                                     " no attribute {name}")
-        if "fitted_estimator_" not in self.__dict__:
-            return getattr(self.estimator, name)
-        return getattr(self.fitted_estimator_, name)
