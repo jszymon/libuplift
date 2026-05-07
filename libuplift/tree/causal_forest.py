@@ -120,7 +120,7 @@ class CausalForestUpliftBase(BaseEstimator):
         trt, n_trt = check_trt(trt, n_trt)
         
         if sample_weight is not None:
-            sample_weight = check_array(sample_weight, ensure_1d=True)
+            sample_weight = check_array(sample_weight, ensure_2d=False)
             check_consistent_length(X, y, trt, sample_weight)
         else:
             check_consistent_length(X, y, trt)
