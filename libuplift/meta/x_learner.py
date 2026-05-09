@@ -18,7 +18,7 @@ class XLearnerUpliftRegressor(UpliftRegressorMixin, UpliftMetaModelBase):
         super().__init__(base_estimator=base_estimator)
     def _get_model_names_list(self, X=None, y=None, trt=None):
         if self.n_trt_ > 1:
-            raise ValueError("XLearner is only supported for single treatments")
+            raise ValueError("XLearner is only supported for single treatment.")
         m_names = ["model_c", "model_t", "model_c_hat", "model_t_hat"]
         return m_names
     def _iter_training_subsets(self, X, y, trt, n_trt, sample_weight):
