@@ -95,6 +95,10 @@ class TLearnerUpliftRegressor(MultimodelUpliftRegressor):
     pass
 
 class _MultimodelUpliftClassifierBase(UpliftClassifierMixin, _MultimodelUpliftModel):
+    """Abstract base for several multimodel and response uplift
+    classifiers.
+
+    Implements the predict method."""
     def __init__(self, base_estimator, ignore_control=False):
         super().__init__(base_estimator, prediction_method="predict_proba",
                          ignore_control=ignore_control)
@@ -105,10 +109,6 @@ class _MultimodelUpliftClassifierBase(UpliftClassifierMixin, _MultimodelUpliftMo
         else:
             y = np.dstack(pred_diffs)
         return y
-    """Abstract base for several multimodel and response uplift
-    classifiers.
-
-    Implements the predict method."""
 
 class MultimodelUpliftClassifier(_MultimodelUpliftClassifierBase):
     """Multimodel uplift classifier.
