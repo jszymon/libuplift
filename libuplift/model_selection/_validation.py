@@ -203,12 +203,11 @@ def _check_multimetric_scoring(estimator, scoring):
 
 
 def uplift_check_cv(cv, y, trt, n_trt, *, classifier=False):
-    """Return a correct cv and y_stratify to pass to
-
-    _sklearn_cross_validate.
-
-    y_stratify is used only for stratification since y is contained in a
-    MultiArray."""
+    """Return a correct cv and y_stratify.
+    y_stratify may be used for stratification.  By default stratification
+    is done based on treatment for regression and based on cross of
+    treatment and target for classification.
+    """
     
     # always stratify on treatment and, if available, also on class
     if classifier:
