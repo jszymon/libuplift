@@ -7,12 +7,10 @@ from sklearn.base import is_classifier, BaseEstimator
 from sklearn.base import MetaEstimatorMixin
 from sklearn.utils import indexable
 from sklearn.utils.metaestimators import available_if
-from sklearn.model_selection import check_cv
 from sklearn.model_selection import cross_validate as _sklearn_cross_validate
 from sklearn.model_selection import cross_val_predict as _sklearn_cross_val_predict
 from sklearn.model_selection import permutation_test_score as _sklearn_permutation_test_score
 from sklearn.model_selection import learning_curve as _sklearn_learning_curve
-from sklearn.preprocessing import LabelEncoder
 
 from sklearn.utils.metaestimators import _BaseComposition
 
@@ -21,6 +19,7 @@ from ..utils import MultiArray
 
 from ..metrics import check_uplift_scoring
 
+from .cv import uplift_check_cv
 
 __all__ = ['cross_validate', 'cross_val_score', 'cross_val_predict',
            'permutation_test_score', 'learning_curve', 'validation_curve']
@@ -201,26 +200,7 @@ def _check_multimetric_scoring(estimator, scoring):
         raise ValueError(err_msg_generic)
     return scorers
 
-
-def uplift_check_cv(cv, y, trt, n_trt, *, classifier=False):
-    """Return a correct cv and y_stratify.
-    y_stratify may be used for stratification.  By default stratification
-    is done based on treatment for regression and based on cross of
-    treatment and target for classification.
-    """
-    
-    # always stratify on treatment and, if available, also on class
-    if classifier:
-        le = LabelEncoder()
-        y_stratify = le.fit_transform(y)
-        y_stratify = y_stratify * (n_trt+1) + trt
-    else:
-        y_stratify = trt
-    # classifier=True ensures stratification
-    cv = check_cv(cv, y_stratify, classifier=True)
-    return cv, y_stratify
-
-        
+  
 def cross_validate(estimator, X, y, trt, n_trt=None, groups=None, scoring=None, cv=None,
                        *args, **kwargs):
     X, y, trt, groups = indexable(X, y, trt, groups)
