@@ -14,7 +14,7 @@ from ..model_selection import uplift_check_cv
 class DRLearnerUpliftRegressor(UpliftRegressorMixin, UpliftMetaModelBase):
     def __init__(self, base_estimator=LinearRegression(),
                  mean_estimator=None, cv=2):
-        self.base_estimator = base_estimator
+        super().__init__(base_estimator)
         self.mean_estimator = mean_estimator
         self.cv = cv
     def _get_model_names_list(self, X, y, trt):
