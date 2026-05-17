@@ -48,11 +48,14 @@ class TargetTransformUpliftRegressor(UpliftRegressorMixin,
         """Transform target for model building.
 
         full_y is passed to allow tests to avoid overwriting."""
-        n = trt.shape[0]
         mask_c = (trt==0)
         mask_t = ~mask_c
-        nt = mask_t.sum()
-        nc = mask_c.sum()
+        if sample_weight is None:
+            nt = mask_t.sum()
+            nc = mask_c.sum()
+        else:
+            nt = sample_weight[mask_t].sum()
+            nc = sample_weight[mask_c].sum()
         n = nt + nc
         y = np.asarray(y, float) # allow classification problems
         if np.may_share_memory(y, full_y):
