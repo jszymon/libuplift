@@ -5,28 +5,35 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 
 from .base import UpliftMetaModelBase
-from ..base import UpliftRegressorMixin
+from ..base import UpliftRegressorMixin, UpliftClassifierMixin
 
 from ..model_selection import uplift_check_cv
 
 
 
-class DRLearnerUpliftRegressor(UpliftRegressorMixin, UpliftMetaModelBase):
+class DRLearnerBase(UpliftMetaModelBase):
     def __init__(self, base_estimator=LinearRegression(),
                  mean_estimator=None, cv=2):
         super().__init__(base_estimator)
         self.mean_estimator = mean_estimator
         self.cv = cv
-    def _get_model_names_list(self, X, y, trt):
+    def _make_cv(self, y, trt, y_stratify):
+        if y_stratify is None:
+            cv_classifier=False
+        else:
+            cv_classifier=True
+        self.cv_, y_stratify = uplift_check_cv(self.cv, y_stratify,
+                                               trt, self.n_trt_,
+                                               classifier=cv_classifier)
+        self.y_stratify_ = y_stratify # more elegant way to pass to _iter_training_subsets?
+    def _get_model_names_list(self, X, y, trt, *, y_stratify=None):
         if self.n_trt_ > 1:
             raise ValueError("DRLearner is only supported for single treatment.")
         if self.mean_estimator is None:
             self.mean_estimator_ = self.base_estimator
         else:
             self.mean_estimator_ = self.mean_estimator
-        self.cv_, y_stratify = uplift_check_cv(self.cv, y, trt, self.n_trt_,
-                                               classifier=False)
-        self.y_stratify_ = y_stratify # more elegant way to pass to _iter_training_subsets?
+        self._make_cv(y, trt, y_stratify)
         self.n_splits_ = self.cv_.get_n_splits(X, self.y_stratify_)
         if self.n_splits_ > 1:
             m_names = []
@@ -76,8 +83,12 @@ class DRLearnerUpliftRegressor(UpliftRegressorMixin, UpliftMetaModelBase):
             y1_hat = self.models_[i*3+1][1].predict(X_tau)
             # create pseudooutcomes
             # TODO: share code with target transform
-            nt = mask_t.sum()
-            nc = mask_c.sum()
+            if w_tau is None:
+                nt = mask_t.sum()
+                nc = mask_c.sum()
+            else:
+                nt = w_tau[mask_t].sum()
+                nc = w_tau[mask_c].sum()
             n = nt + nc
             y_tau[mask_c] -= y0_hat[mask_c]
             y_tau[mask_t] -= y1_hat[mask_t]
@@ -93,3 +104,33 @@ class DRLearnerUpliftRegressor(UpliftRegressorMixin, UpliftMetaModelBase):
             else:
                 pred += self.models_[3*i+2][1].predict(X)
         return pred / self.n_splits_
+    def fit(self, X, y, trt, n_trt=None, sample_weight=None, *, y_stratify=None):
+        super().fit(X, y, trt, n_trt, sample_weight=sample_weight,
+                    y_stratify=y_stratify)
+
+class DRLearnerUpliftRegressor(UpliftRegressorMixin, DRLearnerBase):
+    pass
+
+class DRLearnerUpliftClassifier(UpliftClassifierMixin, DRLearnerBase):
+    """The classifier works by treating the class variable as 0/1 real
+    target and using a DRLearnerUpliftRegressor.
+
+    The main difference is that stratification takes the target
+    variable into account.
+
+    """
+    def fit(self, X, y, trt, n_trt=None, sample_weight=None, *, y_stratify=None):
+        super().fit(X, y, trt, n_trt, sample_weight=sample_weight,
+                    y_stratify=y_stratify)
+
+    def _make_cv(self, y, trt, y_stratify):
+        if y_stratify is None:
+            y_stratify = y
+        self.cv_, y_stratify = uplift_check_cv(self.cv, y_stratify,
+                                               trt, self.n_trt_,
+                                               classifier=True)
+        self.y_stratify_ = y_stratify # more elegant way to pass to _iter_training_subsets?
+    def predict(self, X):
+        y_pred = super().predict(X)
+        y = np.column_stack([-y_pred, y_pred])
+        return y
