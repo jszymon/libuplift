@@ -43,7 +43,15 @@ class UpliftMetaModelBase(_BaseComposition):
         """
         raise NotImplementedError()
     def _check_base_estimator(self, model_names):
-        if hasattr(self.base_estimator, "fit"):
+        if len(model_names) > 0 and not isinstance(model_names[0], str):
+            # full model list is provided by _get_model_names_list
+            estimator_list = []
+            for m_name, est in model_names:
+                if m_name.startswith("_"):
+                    estimator_list.append((m_name[1:], None))
+                else:
+                    estimator_list.append((m_name, clone(est)))
+        elif hasattr(self.base_estimator, "fit"):
             estimator_list = []
             for m_name in model_names:
                 if m_name.startswith("_"):
@@ -51,7 +59,7 @@ class UpliftMetaModelBase(_BaseComposition):
                 else:
                     estimator_list.append((m_name, clone(self.base_estimator)))
         else:
-            # full model list is provided, check length and names
+            # full model list is provided by user, check length and names
             estimator_list = self.base_estimator
             new_estimator_list = []
             for m_name, (user_m_name, model) in zip(model_names, estimator_list):
@@ -64,16 +72,18 @@ class UpliftMetaModelBase(_BaseComposition):
                 new_estimator_list.append((m_name, clone(model)))
             estimator_list = new_estimator_list
         return estimator_list
-    def fit(self, X, y, trt, n_trt=None, sample_weight=None):
+    def fit(self, X, y, trt, n_trt=None, sample_weight=None, **kwargs):
         X, y = check_X_y(X, y, accept_sparse="csr")
         trt, n_trt = check_trt(trt, n_trt)
         check_consistent_length(X, y, trt)
         self._set_fit_params(y, trt, n_trt)
 
-        self.models_ = self._check_base_estimator(self._get_model_names_list(X, y, trt))
+        model_names_iterator = self._get_model_names_list(X, y, trt, **kwargs)
+        self.models_ = self._check_base_estimator(model_names_iterator)
         self.n_models_ = len(self.models_)
         self.n_ = np.zeros(self.n_models_, dtype=int)
-        for i, (X_i, y_i, w_i) in enumerate(self._iter_training_subsets(X, y, trt, n_trt, sample_weight)):
+        training_subset_iterator = self._iter_training_subsets(X, y, trt, n_trt, sample_weight)
+        for i, (X_i, y_i, w_i) in enumerate(training_subset_iterator):
             m_name, m_i = self.models_[i]
             if m_i is not None:
                 if w_i is None:
