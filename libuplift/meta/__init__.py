@@ -18,6 +18,7 @@ from .nested import DDRUpliftClassifier
 from .x_learner import XLearnerUpliftRegressor
 from .dr_learner import DRLearnerUpliftRegressor
 from .dr_learner import DRLearnerUpliftClassifier
+from .r_learner import RLearnerUpliftRegressor
 
 __all__ = ["MultimodelUpliftRegressor",
            "MultimodelUpliftClassifier",
@@ -36,4 +37,5 @@ __all__ = ["MultimodelUpliftRegressor",
            "XLearnerUpliftRegressor",
            "DRLearnerUpliftRegressor",
            "DRLearnerUpliftClassifier",
+           "RLearnerUpliftRegressor",
            ]
