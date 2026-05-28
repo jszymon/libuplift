@@ -28,7 +28,7 @@ class DRLearnerBase(UpliftMetaModelBase):
         self.y_stratify_ = y_stratify # more elegant way to pass to _iter_training_subsets?
     def _get_model_names_list(self, X, y, trt, *, y_stratify=None):
         if self.n_trt_ > 1:
-            raise ValueError("DRLearner is only supported for single treatment.")
+            raise ValueError("DRLearner is only supported for a single treatment.")
         if self.mean_estimator is None:
             self.mean_estimator_ = self.base_estimator
         else:
