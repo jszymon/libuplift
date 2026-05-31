@@ -3,8 +3,7 @@
 import numpy as np
 
 def quantile(a, q, axis=None, out=None, overwrite_input=False,
-             method='linear', keepdims=False, *, weights=None,
-             interpolation=None):
+             method='linear', keepdims=False, *, weights=None):
     """Weighted quantiles functions.
 
     When sample_weight is None np.quantile is used.  Also used for
@@ -19,8 +18,7 @@ def quantile(a, q, axis=None, out=None, overwrite_input=False,
     if weights is None:
         return np.quantile(a, q, axis=axis, out=out,
                            overwrite_input=overwrite_input,
-                           method=method, keepdims=keepdims,
-                           interpolation=interpolation)
+                           method=method, keepdims=keepdims)
 
     def weighted_quantile(data, quantiles, weights):
         """
