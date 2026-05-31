@@ -8,7 +8,7 @@ def area_under_curve(xs, ys, subtract_diag=True):
     If subtract_diag is True area under the diagonal is subtracted.
 
     """
-    auc = np.trapz(ys, xs)
+    auc = np.trapezoid(ys, xs)
     if subtract_diag:
         a = xs[-1] - xs[0]
         h = ys[-1]
