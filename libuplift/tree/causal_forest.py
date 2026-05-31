@@ -132,15 +132,7 @@ class CausalForestUpliftBase(BaseEstimator):
         else:
             self.feature_names_in_ = None
 
-        # activate R interface
-        self._import_rpy2()
-        
         # Prepare parameters for grf
-        # Convert numpy arrays to R vectors
-        X_r = self.ro_.r.matrix(X, nrow=X.shape[0], ncol=X.shape[1])
-        y_r = self.ro_.r.matrix(y, nrow=y.shape[0], ncol=1)
-        W_r = self.ro_.r.matrix(trt, nrow=trt.shape[0], ncol=1)
-        
         # Build parameter dict, removing None values
         params = {
             'num.trees': self.num_trees,
@@ -164,9 +156,20 @@ class CausalForestUpliftBase(BaseEstimator):
             params['seed'] = self.seed
         if sample_weight is not None:
             params['sample.weights'] = sample_weight
+
+        # activate R interface
+        self._import_rpy2()
         
-        # Train the forest
-        self.grf_forest_ = self.grf_.causal_forest(X_r, y_r, W_r, **params)
+        # Prepare parameters for grf fitting
+        # Convert numpy arrays to R vectors
+        with self.ro_.numpy2ri.converter.context():
+            X_r = self.ro_.r.matrix(X, nrow=X.shape[0], ncol=X.shape[1])
+            y_r = self.ro_.r.matrix(y, nrow=y.shape[0], ncol=1)
+            W_r = self.ro_.r.matrix(trt, nrow=trt.shape[0], ncol=1)
+        
+        
+            # Train the forest
+            self.grf_forest_ = self.grf_.causal_forest(X_r, y_r, W_r, **params)
         
         # Set treatment info
         self._set_fit_params(y, trt, n_trt)
@@ -198,11 +201,12 @@ class CausalForestUpliftBase(BaseEstimator):
         # activate R interface if not already active
         self._import_rpy2()
 
-        X_r = self.ro_.r.matrix(X, nrow=X.shape[0], ncol=X.shape[1])
+        with self.ro_.numpy2ri.converter.context():
+            X_r = self.ro_.r.matrix(X, nrow=X.shape[0], ncol=X.shape[1])
         
-        # Predict
-        predictions_r = self.grf_.predict_causal_forest(self.grf_forest_, X_r)
-        predictions = np.array(predictions_r)
+            # Predict
+            predictions_r = self.grf_.predict_causal_forest(self.grf_forest_, X_r)
+        predictions = np.array(predictions_r, dtype=float)
         
         # The predictions from grf are a matrix with column 'predictions'
         # Extract the predictions column
@@ -228,9 +232,6 @@ class CausalForestUpliftBase(BaseEstimator):
                 f"rpy2 is required for {self.__class__.__name__}. "
                 "Install it with: pip install rpy2"
             ) from e
-        
-        # Set up rpy2 conversion
-        numpy2ri.activate()
         
         try:
             grf = importr('grf')
