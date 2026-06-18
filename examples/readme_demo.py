@@ -1,7 +1,15 @@
-"""Demo from uplift-sklearn README.md"""
+"""
+==================================
+Demo from uplift-sklearn README.md
+==================================
 
+Shows a high level demo of package use.
 
-### necessary imports
+"""
+
+# %%
+# The necessary imports
+# ---------------------
 
 import numpy as np
 np.random.seed(123)
@@ -15,7 +23,9 @@ from sklearn.linear_model import LogisticRegression
 from libuplift.meta import TLearnerUpliftClassifier
 
 
-### fetch and prepare data
+# %%
+# fetch and prepare data
+# ----------------------
 
 from libuplift.datasets import fetch_Hillstrom
 D = fetch_Hillstrom(as_frame=True)

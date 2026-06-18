@@ -44,7 +44,8 @@ extensions = [
     'sphinx.ext.todo',
     #'sphinx.ext.autosummary',
     'autoapi.extension',
-    'numpydoc'
+    'numpydoc',
+    'sphinx_gallery.gen_gallery',
 ]
 #autosummary_generate = True
 autoapi_dirs = ['../libuplift']
@@ -65,6 +66,16 @@ def skip_members_hook(app, what, name, obj, skip, options):
     return skip
 def setup(sphinx):
     sphinx.connect("autoapi-skip-member", skip_members_hook)
+
+# example gallery
+sphinx_gallery_conf = {
+    # path to your examples script directory
+    'examples_dirs': '../examples',
+    # path where the generated gallery should go
+    'gallery_dirs': 'auto_examples',
+    'filename_pattern': r'readme_demo.py',
+    'ignore_pattern': r'.*\.py',
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
