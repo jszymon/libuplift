@@ -1,3 +1,4 @@
 sphinx-autoapi==3.6.1
 numpydoc==1.10.0
 pydata-sphinx-theme==0.16.1
+sphinx-gallery==0.21.0
