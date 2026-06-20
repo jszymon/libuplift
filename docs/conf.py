@@ -74,7 +74,7 @@ sphinx_gallery_conf = {
     # path where the generated gallery should go
     'gallery_dirs': 'auto_examples',
     'filename_pattern': r'readme_demo.py',
-    'ignore_pattern': r'.*\.py',
+    #'ignore_pattern': r'.*\.py',
 }
 
 # Add any paths that contain templates here, relative to this directory.

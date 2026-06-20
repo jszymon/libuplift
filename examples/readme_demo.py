@@ -7,9 +7,9 @@ Shows a high level demo of package use.
 
 """
 
-# %%
+####################################
 # The necessary imports
-# ---------------------
+####################################
 
 import numpy as np
 np.random.seed(123)
@@ -23,17 +23,19 @@ from sklearn.linear_model import LogisticRegression
 from libuplift.meta import TLearnerUpliftClassifier
 
 
-# %%
-# fetch and prepare data
-# ----------------------
+####################################
+# Fetch and prepare data
+####################################
 
 from libuplift.datasets import fetch_Hillstrom
 D = fetch_Hillstrom(as_frame=True)
 trt = D.treatment
+
 # encode categorical features, standardize numerical features
 ct = ColumnTransformer([("ohe", OneHotEncoder(), list(D.categ_values.keys()))],
                        remainder=StandardScaler())
 X = ct.fit_transform(D.data)
+
 # keep only women's campaign
 mask = ~(trt == 1)
 X = X[mask]
@@ -41,8 +43,9 @@ y = D.target_visit[mask]
 trt = (trt[mask] == 2)*1
 
 
-### fit model and draw uplift curve
-
+####################################
+# Fit model and draw uplift curve
+####################################
 
 X_train, X_test, y_train, y_test, trt_train, trt_test = train_test_split(X, y, trt, train_size=0.7)
 m = TLearnerUpliftClassifier(base_estimator=LogisticRegression())
@@ -59,7 +62,9 @@ plt.plot([0,1], [0,cy[-1]], "k-")
 plt.show()
 
 
-### tune model parameters using crossvalidation
+####################################
+# Tune model parameters using crossvalidation
+####################################
 
 # import those from libuplift instead of sklearn
 from libuplift.model_selection import cross_val_score
@@ -87,8 +92,9 @@ m_cv1.fit(X, y, trt, n_trt=1)
 print("best params: ", m_cv1.best_params_)
 
 
-
-### verify model significance using permutation test, draw learning curve
+####################################
+# Verify model significance using permutation test, draw learning curve
+####################################
 
 # those functions are thin wrappers around original sklearn functions,
 # so they accept the same set of parameters
