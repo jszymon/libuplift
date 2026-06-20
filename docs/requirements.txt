@@ -3,4 +3,4 @@ numpydoc==1.10.0
 pydata-sphinx-theme==0.16.1
 sphinx-gallery==0.21.0
 matplotlib==3.11.0
-
+scikit-learn==1.8.0
