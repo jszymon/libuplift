@@ -1,4 +1,8 @@
-Gallery of libuplift examples
-=============================
+Examples
+========
 
-Below is a gallery of examples
+
+Gallery of libuplift examples
+-----------------------------
+
+

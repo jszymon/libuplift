@@ -6,6 +6,7 @@ Welcome to libuplift's documentation!
    :caption: Contents:
 
    autoapi/index
+   auto_examples/index
 
 
 libuplift
