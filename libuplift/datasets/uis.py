@@ -118,7 +118,7 @@ def fetch_uis(data_home=None, download_if_missing=True,
        or Less", New England Journal of Medicine, 337(11), 725--733,
        1997 (https://www.nejm.org/doi/10.1056/NEJMoa040595).
 
-    .. [2]Koenker, R. (2022). quantreg: Quantile Regression. R package
+    .. [2] Koenker, R. (2022). quantreg: Quantile Regression. R package
        version 5.94.  https://CRAN.R-project.org/package=quantreg
 
     """
