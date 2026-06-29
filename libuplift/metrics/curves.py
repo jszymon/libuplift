@@ -127,14 +127,14 @@ def uplift_curve_j(y_true, y_score, trt, n_trt=None, pos_label=None, sample_weig
 
     return x, u
 
-
-def area_under_uplift_curve(y_true, y_score, trt, n_trt=None, pos_label=None, sample_weight=None,
-         subtract_diag=True):
-    x, u = uplift_curve(y_true, y_score, trt, n_trt=n_trt, pos_label=pos_label,
-                        sample_weight=sample_weight)
+# areas under curves
+def _area_under_uplift_curve_helper(curve_maker_fun, y_true, y_score, trt, n_trt=None,
+                                    pos_label=None, sample_weight=None,
+                                    subtract_diag=True):
+    x, u = curve_maker_fun(y_true, y_score, trt, n_trt=n_trt, pos_label=pos_label,
+                           sample_weight=sample_weight)
     return area_under_curve(x, u, subtract_diag=subtract_diag)
-def area_under_uplift_curve_j(y_true, y_score, trt, n_trt=None, pos_label=None, sample_weight=None,
-           subtract_diag=True):
-    x, u = uplift_curve_j(y_true, y_score, trt, n_trt=n_trt, pos_label=pos_label,
-                          sample_weight=sample_weight)
-    return area_under_curve(x, u, subtract_diag=subtract_diag)
+def area_under_uplift_curve(*args, **kwargs):
+    return _area_under_uplift_curve_helper(uplift_curve, *args, **kwargs)
+def area_under_uplift_curve_j(*args, **kwargs):
+    return _area_under_uplift_curve_helper(uplift_curve_j, *args, **kwargs)
