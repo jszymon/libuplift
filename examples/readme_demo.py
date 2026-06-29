@@ -106,7 +106,7 @@ score, permutation_scores, pv =\
                            verbose=10, n_jobs=-1)
 
 fix, (ax0, ax1) = plt.subplots(ncols=2)
-ax0.hist(permutation_scores, density=True, label=f"p-value={pv}")
+ax0.hist(permutation_scores, density=False, label=f"p-value={pv}")
 ax0.axvline(score, color="r")
 ax0.set_title("Permutation test")
 
