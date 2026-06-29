@@ -127,6 +127,37 @@ def uplift_curve_j(y_true, y_score, trt, n_trt=None, pos_label=None, sample_weig
 
     return x, u
 
+# Qini curves
+def Qini_curve(y_true, y_score, trt, n_trt=None, pos_label=None,
+               sample_weight=None):
+    """Qini curve.
+
+    Qini curves proposed by Radcliffe et al. [1]_.  They differ from
+    uplift curves by expressing uplift in terms of raw success counts
+    on the treated group.  Number of successes on the control group is
+    scaled by the relative group sizes.
+
+    Only `separate' variant is provided.
+
+    .. [1] Radcliffe, Nicholas J. (2007). "Using control groups to
+    target on predicted lift: Building and assessing uplift model",
+    Direct Marketing Analytics Journal, 14-21.
+
+    """
+    if sample_weight is None:
+        check_consistent_length(y_true, y_score, trt)
+        n_t = (trt==1).sum()
+    else:
+        sample_weight = check_array(sample_weight, ensure_2d=False)
+        check_consistent_length(y_true, y_score, trt, sample_weight)
+        sample_weight_t = sample_weight[trt==1]
+        n_t = sample_weight_t.sum()
+    x, u = uplift_curve(y_true, y_score, trt, n_trt=n_trt,
+                      pos_label=pos_label,
+                      sample_weight=sample_weight)
+    u *= n_t
+    return x, u
+
 # areas under curves
 def _area_under_uplift_curve_helper(curve_maker_fun, y_true, y_score, trt, n_trt=None,
                                     pos_label=None, sample_weight=None,
@@ -138,3 +169,5 @@ def area_under_uplift_curve(*args, **kwargs):
     return _area_under_uplift_curve_helper(uplift_curve, *args, **kwargs)
 def area_under_uplift_curve_j(*args, **kwargs):
     return _area_under_uplift_curve_helper(uplift_curve_j, *args, **kwargs)
+def area_under_Qini_curve(*args, **kwargs):
+    return _area_under_uplift_curve_helper(Qini_curve, *args, **kwargs)
