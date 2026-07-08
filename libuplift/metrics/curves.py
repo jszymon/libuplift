@@ -171,3 +171,46 @@ def area_under_uplift_curve_j(*args, **kwargs):
     return _area_under_uplift_curve_helper(uplift_curve_j, *args, **kwargs)
 def area_under_Qini_curve(*args, **kwargs):
     return _area_under_uplift_curve_helper(Qini_curve, *args, **kwargs)
+
+def _optimal_curve_helper(curve_maker_fun, y_true, trt, n_trt=None,
+                         pos_label=None, sample_weight=None):
+    """Optimal curve following the ideas of Radcliffe and Surry
+    (2011).
+
+    The curves are obtained by sorting positive responses first in
+    treatment group and last in control group.  Intended for separate
+    curves, results for joint curves are harder to interpret.
+
+    The case when sample_weight is present is not discussed in
+    literature.  Here, it is used for sorting such that cases with
+    highest weights come first in treatment and last in control.  This
+    way the of the curve is maintained.
+
+    """
+    trt, n_trt = check_trt(trt, n_trt)
+    if n_trt > 1:
+        raise ValueError("optimal curve only supported for a single treatment.")
+    if pos_label is not None:
+        y_true = (y_true == pos_label)
+    y_score = y_true.copy()
+    if sample_weight is not None:
+        sample_weight = check_array(sample_weight, ensure_2d=False)
+        check_consistent_length(trt, sample_weight)
+        y_score = y_score * sample_weight
+    if np.isdtype(y_score.dtype, "bool"):
+        np.logical_not(y_score, where=(trt==0), out=y_score)
+    elif np.isdtype(y_score.dtype, "unsigned integer"):
+        y_score[trt==0] = 1-y_score[trt==0]
+    else:
+        np.negative(y_score, where=(trt==0), out=y_score)
+    x, u = curve_maker_fun(y_true, y_score, trt, n_trt=n_trt)
+    return x, u
+
+def optimal_uplift_curve(y_true, trt, n_trt=None, pos_label=None,
+                         sample_weight=None):
+    return _optimal_curve_helper(uplift_curve, y_true, trt, n_trt,
+                                 pos_label, sample_weight)
+def optimal_Qini_curve(y_true, trt, n_trt=None, pos_label=None,
+                       sample_weight=None):
+    return _optimal_curve_helper(Qini_curve, y_true, trt, n_trt,
+                                 pos_label, sample_weight)
