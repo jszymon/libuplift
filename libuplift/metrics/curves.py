@@ -44,6 +44,8 @@ def uplift_curve(y_true, y_score, trt, n_trt=None, pos_label=None,
     y_true = check_array(y_true, ensure_2d=False)
     y_score = check_array(y_score, ensure_2d=False)
     trt, n_trt = check_trt(trt, n_trt)
+    if n_trt > 1:
+        raise ValueError("uplift curve only supported for a single treatment.")
     if sample_weight is None:
         check_consistent_length(y_true, y_score, trt)
         sample_weight_c = None
@@ -57,8 +59,6 @@ def uplift_curve(y_true, y_score, trt, n_trt=None, pos_label=None,
         sample_weight_t = sample_weight[trt==1]
         n_c = sample_weight_c.sum()
         n_t = sample_weight_t.sum()
-    if n_trt > 1:
-        raise ValueError("uplift curve only supported for a single treatment.")
         
     if pos_label is not None:
         y_true = (y_true == pos_label)
@@ -99,6 +99,8 @@ def uplift_curve_j(y_true, y_score, trt, n_trt=None, pos_label=None, sample_weig
     y_true = check_array(y_true, ensure_2d=False, copy=True, dtype=float)
     y_score = check_array(y_score, ensure_2d=False)
     trt, n_trt = check_trt(trt, n_trt)
+    if n_trt > 1:
+        raise ValueError("uplift curve only supported for a single treatment.")
     if sample_weight is None:
         check_consistent_length(y_true, y_score, trt)
         sample_weight = np.ones_like(y_true, dtype=float)
@@ -106,8 +108,6 @@ def uplift_curve_j(y_true, y_score, trt, n_trt=None, pos_label=None, sample_weig
         sample_weight = check_array(sample_weight, ensure_2d=False,
                                     dtype=float, copy=True)
         check_consistent_length(y_true, y_score, trt, sample_weight)
-    if n_trt > 1:
-        raise ValueError("uplift curve only supported for a single treatment.")
         
     if pos_label is not None:
         y_true = (y_true == pos_label)
@@ -144,17 +144,17 @@ def Qini_curve(y_true, y_score, trt, n_trt=None, pos_label=None,
     Direct Marketing Analytics Journal, 14-21.
 
     """
+    trt, n_trt = check_trt(trt, n_trt)
+    x, u = uplift_curve(y_true, y_score, trt, n_trt=n_trt,
+                        pos_label=pos_label,
+                        sample_weight=sample_weight)
     if sample_weight is None:
-        check_consistent_length(y_true, y_score, trt)
         n_t = (trt==1).sum()
     else:
         sample_weight = check_array(sample_weight, ensure_2d=False)
-        check_consistent_length(y_true, y_score, trt, sample_weight)
+        check_consistent_length(trt, sample_weight)
         sample_weight_t = sample_weight[trt==1]
         n_t = sample_weight_t.sum()
-    x, u = uplift_curve(y_true, y_score, trt, n_trt=n_trt,
-                      pos_label=pos_label,
-                      sample_weight=sample_weight)
     u *= n_t
     return x, u
 
