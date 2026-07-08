@@ -6,7 +6,7 @@ from sklearn.base import is_classifier
 
 from .regression import e_sate, e_satt
 from .curves import area_under_uplift_curve, area_under_uplift_curve_j
-from .curves import area_under_Qini_curve
+from .curves import area_under_Qini_curve, Qini_coefficient
 from .bins import QMSE, QMSE_j, EUCE, MUCE
 
 class _BaseUpliftScorer:
@@ -281,6 +281,7 @@ _UPLIFT_SCORERS = dict(
     auuc=make_uplift_scorer(area_under_uplift_curve, greater_is_better=True),
     auuc_j=make_uplift_scorer(area_under_uplift_curve_j, greater_is_better=True),
     auqc=make_uplift_scorer(area_under_Qini_curve, greater_is_better=True),
+    Qini_coeff=make_uplift_scorer(Qini_coefficient, greater_is_better=True),
     QMSE=make_uplift_scorer(QMSE, greater_is_better=False),
     QMSE_j=make_uplift_scorer(QMSE_j, greater_is_better=False),
     EUCE=make_uplift_scorer(EUCE, greater_is_better=False),

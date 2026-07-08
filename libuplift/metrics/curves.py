@@ -214,3 +214,15 @@ def optimal_Qini_curve(y_true, trt, n_trt=None, pos_label=None,
                        sample_weight=None):
     return _optimal_curve_helper(Qini_curve, y_true, trt, n_trt,
                                  pos_label, sample_weight)
+
+def Qini_coefficient(y_true, y_score, trt, n_trt=None, pos_label=None,
+                     sample_weight=None):
+    """Qini coefficient introduced by Radcliffe and Surry."""
+    auqc = area_under_Qini_curve(y_true, y_score, trt, n_trt=n_trt,
+                                 pos_label=pos_label,
+                                 sample_weight=sample_weight)
+    x_opt, u_opt = optimal_Qini_curve(y_true, trt, n_trt=n_trt,
+                                      pos_label=pos_label,
+                                      sample_weight=sample_weight)
+    au_opt_qc = area_under_curve(x_opt, u_opt, subtract_diag=True)
+    return auqc / au_opt_qc
