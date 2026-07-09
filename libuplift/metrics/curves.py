@@ -190,6 +190,7 @@ def _optimal_curve_helper(curve_maker_fun, y_true, trt, n_trt=None,
     trt, n_trt = check_trt(trt, n_trt)
     if n_trt > 1:
         raise ValueError("optimal curve only supported for a single treatment.")
+    y_true = check_array(y_true, ensure_2d=False)
     if pos_label is not None:
         y_true = (y_true == pos_label)
     y_score = y_true.copy()
