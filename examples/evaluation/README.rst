@@ -1,3 +1,3 @@
-Methods for evaluation of uplift models
----------------------------------------
+Evaluation of uplift models
+---------------------------
 
