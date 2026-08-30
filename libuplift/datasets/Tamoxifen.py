@@ -16,7 +16,8 @@ def fetch_Tamoxifen(data_home=None, download_if_missing=True,
                     categ_as_strings=False, return_X_y=False,
                     as_frame=False):
     """Load the Tamoxifen randomized trial dataset from Melania
-    Pintilie's book "Competing Risks, A Practical Perspective.
+    Pintilie's book "Competing Risks, A Practical Perspective"
+    (https://sites.google.com/view/melaniapintiliemscstatistics/home/statistics?authuser=0).
 
     The description of the original study can be found in [1]_.
 
