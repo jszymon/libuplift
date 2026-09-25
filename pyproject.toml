@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "libuplift"
-version = "0.1"
+version = "0.5"
 authors = [
     {name = "Szymon Jaroszewicz", email = "jszymon@gmail.com"},
     {name = "Krzysztof Rudaś", email = "krzysztof.rudas@ipipan.waw.pl"},
@@ -19,6 +19,6 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
-    "scikit-learn >= 1.6",
+    "scikit-learn >= 1.8",
 ]
 dynamic = []

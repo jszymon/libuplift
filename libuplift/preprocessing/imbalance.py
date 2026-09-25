@@ -1,4 +1,5 @@
-"""Handle class imbalance."""
+"""Methods and wrappers for correcting class imbalance in uplift
+modeling."""
 
 import numpy as np
 from sklearn.base import BaseEstimator
@@ -8,7 +9,7 @@ from ..base import UpliftClassifierMixin
 from ..utils import check_trt
 
 
-def class_flip_sample(y, trt, *, K=None, sample_weight=None,
+def _class_flip_sample(y, trt, *, K=None, sample_weight=None,
                       random_state=None):
     n_trt, n_classes = K.shape
     rng = check_random_state(random_state)
@@ -34,7 +35,7 @@ def class_flip_sample(y, trt, *, K=None, sample_weight=None,
             y[mask_flip] = 1-y[mask_flip]
     return y
 
-def class_flip_weighted(X, y, trt, K=None, sample_weight=None,
+def _class_flip_weighted(X, y, trt, K=None, sample_weight=None,
                         interleave=True):
     """y_unflipped contains original y's multiplied.  Useful e.g. for stratification."""
     n_trt, n_classes = K.shape
@@ -91,24 +92,38 @@ def class_flip_weighted(X, y, trt, K=None, sample_weight=None,
         trt = np.concatenate([trt] + new_trts)
     return X, y, w, trt, y_unflipped
 
-def class_flip(X, y, trt, n_trt=None, *, K=None, kc0=1, kc1=1, kt0=1, kt1=1, sample_weight=None,
+def class_flip(X, y, trt, n_trt=None, *, K=None, sample_weight=None,
                interleave=True, random_state=None, method="weights"):
+    """Low level class flipping function.
+
+    Parameters
+    ----------
+    K : matrix
+        Gives flipping proportion (1-k) for every treatment x class
+        pair.
+    interlreave: boolean, default=True
+        If True flipped records are added right after original
+        records, not at the end.  Only applicable if method="weights"
+    method: string
+        If "sample" class records are actually flipped.  If "weights"
+        a weighting and record copying scheme is used instead.
+
+    """
     if K is None:
-        K = np.array([[kc0, kc1], [kt0, kt1]])
-    else:
-        K = np.asarray(K)
+        raise RuntimeError("The flipping proportion matrix not provided.")
+    K = np.asarray(K)
     if len(K.shape) != 2:
         raise RuntimeError("The flipping proportions must be a two diemnsional array")
     if np.any(K < 0) or np.any(K > 1):
         raise RuntimeError("Class flipping factors must be in [0,1]")
     if method == "weights":
-        Xf, yf, wf, trtf, y_unflipped = class_flip_weighted(X, y, trt, K,
-                                                            sample_weight=sample_weight,
-                                                            interleave=interleave)
+        Xf, yf, wf, trtf, y_unflipped = _class_flip_weighted(X, y, trt, K,
+                                                             sample_weight=sample_weight,
+                                                             interleave=interleave)
     elif method == "sample":
-        yf = class_flip_sample(y.copy(), trt, K=K,
-                               sample_weight=sample_weight,
-                               random_state=random_state)
+        yf = _class_flip_sample(y.copy(), trt, K=K,
+                                sample_weight=sample_weight,
+                                random_state=random_state)
         Xf = X
         trtf = trt
         wf = sample_weight
@@ -176,11 +191,24 @@ class UpliftBalancerBase(UpliftClassifierMixin, BaseEstimator):
                                " be: error, ignore or warn.")
 
 class StratifiedUndersampledUpliftClassifier(UpliftBalancerBase):
-    """Wraps an uplift model with stratified resampling imbalance
-    correction from [1]
+    """Wraps an uplift model with stratified undersampling imbalance
+    correction from [1]_.
 
     Undersamples the majority to inflate the minority class k times.
-    When k='balance' tries to balance classes as described in [2]
+    Both treatments are undersampled at the same rate.  When
+    k='balance' tries to balance classes as much as possible described
+    in [2]_.
+
+    References
+    ----------
+
+    .. [1] O Nyberg, A Klami, "Exploring uplift modeling with high
+       class imbalance", Data Mining and Knowledge Discovery 37(2),
+       736-766, 2023
+
+    .. [2] K. Rudaś, S. Jaroszewicz, "Class flipping for uplift
+       modeling and Heterogeneous Treatment Effect estimation on
+       imbalanced RCT data", 2025
 
     """
     def fit(self, X, y, trt, n_trt=None, sample_weight=None):
@@ -188,7 +216,7 @@ class StratifiedUndersampledUpliftClassifier(UpliftBalancerBase):
         self._set_fit_params(y, trt, n_trt)
         super().fit(X, y, trt, n_trt)
         self._check_binary()
-        P_y_cond_trt, P_trt = self._compute_probs(y, trt, sample_weight)
+        P_y_cond_trt, _P_trt = self._compute_probs(y, trt, sample_weight)
         maj_class = self._majority_class(P_y_cond_trt)
         if maj_class is None:
             # fit the model without balancing
@@ -217,11 +245,15 @@ class StratifiedUndersampledUpliftClassifier(UpliftBalancerBase):
 
 class FlippedUpliftClassifier(UpliftBalancerBase):
     """Wraps an uplift model with class flipping imbalance
-    correction.
+    correction [1]_.
 
     Flips the majority class labels in both the treatment and the
     control group so as to inflate the minority class k times.  When
     k='balance' tries to balance classes.
+
+    .. [1] K. Rudaś, S. Jaroszewicz, "Class flipping for uplift
+       modeling and Heterogeneous Treatment Effect estimation on
+       imbalanced RCT data", 2025
 
     """
     def __init__(self, base_estimator, method="weights", k="balance",
@@ -234,7 +266,7 @@ class FlippedUpliftClassifier(UpliftBalancerBase):
         super().fit(X, y, trt, n_trt)
         self._check_binary()
         
-        P_y_cond_trt, P_trt = self._compute_probs(y, trt, sample_weight)
+        P_y_cond_trt, _P_trt = self._compute_probs(y, trt, sample_weight)
         maj_class = self._majority_class(P_y_cond_trt)
         K = np.ones((2, 2))
         if maj_class is None:

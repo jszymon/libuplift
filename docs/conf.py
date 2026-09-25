@@ -20,13 +20,13 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'libuplift'
-copyright = '2025, Szymon Jaroszewicz'
+copyright = '2026, Szymon Jaroszewicz'
 author = 'Szymon Jaroszewicz, Krzysztof Rudaś'
 
 # The short X.Y version
-version = '0.1'
+version = '0.5'
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = '0.5'
 
 
 # -- General configuration ---------------------------------------------------
@@ -57,7 +57,7 @@ autoapi_options = ['members',
                    'special-members',
                    #'imported-members',
                    ]
-autoapi_ignore = ['*_data*', '*robinson*', '*pipeline*', '*preprocessing*', '*tree*']
+autoapi_ignore = ['*_data*', '*robinson*', '*pipeline*', '*preprocessing/iptw*', '*tree*']
 def skip_members_hook(app, what, name, obj, skip, options):
     if "ARCHIVE" in name:
         skip = True
