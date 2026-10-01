@@ -228,8 +228,12 @@ class StratifiedUndersampledUpliftClassifier(UpliftBalancerBase):
             else:
                 self.k_ = self.k
         S = (1.0 / self.k_ - P_y_cond_trt[:,1-maj_class]) / P_y_cond_trt[:,maj_class]
-        if np.any(S < 0):
-            self._print_balancing_error("negative undersampling rate.  Using 0 instead.")
+        if S[0] < 0:
+            self._print_balancing_error("can't balance probabilities in control.  Keeping original.")
+            S[0] = 0
+        if S[1] < 0:
+            self._print_balancing_error("can't balance probabilities in treatment.  Keeping original.")
+            S[1] = 0
         if sample_weight is not None:
             w = sample_weight.copy()
         else:
