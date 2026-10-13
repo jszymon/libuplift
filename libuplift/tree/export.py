@@ -18,7 +18,8 @@ def export_text(tree, feature_names=None, decimals=2, spacing=3):
         If None, generic names will be used ("feature_0", "feature_1", ...).
     
     decimals : int, default=2
-        Number of decimal digits to display.
+        Number of decimal digits to display.  Split gains are shown
+        with this many significant digits.
     
     spacing : int, default=3
         Number of spaces between edges. The higher it is, the wider the result.
@@ -53,10 +54,11 @@ def _build_tree_text(node, feature_names, lines, prefix, decimals, spacing):
         # Internal node
         feature_name = feature_names[node.feature_idx]
         threshold_str = f"{node.threshold:.{decimals}f}"
-        
+        gain_str = f"   (gain = {node.gain:.{decimals}g})" if node.gain is not None else ""
+
         # Left child (samples <= threshold)
         left_prefix = prefix + "|" + (" " * spacing)
-        lines.append(f"{prefix}|--- {feature_name} <= {threshold_str}")
+        lines.append(f"{prefix}|--- {feature_name} <= {threshold_str}{gain_str}")
         _build_tree_text(node.left, feature_names, lines, left_prefix, decimals, spacing)
         
         # Right child (samples > threshold)
