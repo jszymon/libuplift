@@ -12,9 +12,9 @@ class HurdleRegressor(BaseEstimator, RegressorMixin):
     useful for uplift models based on target variable transformation.
 
     Stage 1 (the hurdle): a classifier models P(y != 0 | X), where a value
-    counts as "zero" if |y| <= threshold.
+    counts as "zero" if ``|y| <= threshold``.
     Stage 2 (the non-zero part): a regressor is fit only on rows with
-    |y| > threshold and models E[y | y != 0, X]. Its output can be negative.
+    ``|y| > threshold`` and models ``E[y | y != 0, X]``. Its output can be negative.
 
     The prediction is the unconditional mean (near-zero values count as 0):
 
@@ -30,15 +30,19 @@ class HurdleRegressor(BaseEstimator, RegressorMixin):
         are all one sign, you can use e.g. PoissonRegressor / GammaRegressor
         (for positive y) instead.
     threshold : float, default=0.0
-        Rows with |y| <= threshold are treated as zeros (hurdle not crossed).
+        Rows with ``|y| <= threshold`` are treated as zeros (hurdle not crossed).
         Must be >= 0. With 0.0, only exact zeros are zeros.
 
     Attributes
     ----------
-    classifier_ : fitted hurdle classifier (None if only one class was seen)
-    regressor_ : fitted non-zero regressor (None if no non-zero rows)
-    p_nonzero_const_ : float, share of non-zero rows (used if classifier_ is None)
-    n_features_in_ : int
+    ``classifier_`` : estimator or None
+        Fitted hurdle classifier (None if only one class was seen).
+    ``regressor_`` : estimator or None
+        Fitted non-zero regressor (None if no non-zero rows).
+    ``p_nonzero_const_`` : float
+        Share of non-zero rows (used if ``classifier_`` is None).
+    ``n_features_in_`` : int
+        Number of features seen during fit.
 
     """
 
@@ -76,7 +80,7 @@ class HurdleRegressor(BaseEstimator, RegressorMixin):
         return self
 
     def predict_proba_nonzero(self, X):
-        """P(|y| > threshold | X)."""
+        """``P(|y| > threshold | X)``."""
         check_is_fitted(self, "p_nonzero_const_")
         X = check_array(X)
         if self.classifier_ is None:
@@ -84,7 +88,7 @@ class HurdleRegressor(BaseEstimator, RegressorMixin):
         return self.classifier_.predict_proba(X)[:, 1]
 
     def predict_nonzero(self, X):
-        """E[y | |y| > threshold, X]."""
+        """``E[y | |y| > threshold, X]``."""
         check_is_fitted(self, "p_nonzero_const_")
         X = check_array(X)
         if self.regressor_ is None:
