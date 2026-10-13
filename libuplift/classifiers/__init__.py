@@ -3,3 +3,4 @@ modeling."""
 
 from .memoized import MemoizedClassifier
 from .classifier_as_regressor import ClassifierAsRegressor
+from .hurdle import HurdleRegressor
