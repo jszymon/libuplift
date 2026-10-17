@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler
 
 from libuplift.datasets import fetch_Hillstrom
 from libuplift.meta import MultimodelUpliftClassifier
-from libuplift.tree import UpliftTreeClassifier, export_text
+from libuplift.tree import UpliftTreeClassifier, export_text, plot_tree
 
 from libuplift.metrics import uplift_curve, uplift_curve_j
 from libuplift.model_selection import cross_validate, cross_val_score, uplift_check_cv
@@ -34,20 +34,24 @@ except:
 def encode_features(D):
     """Convert features to float matrix.
 
-    Use K-1 encoding for categorical variables."""
+    Use K-1 encoding for categorical variables.  Return the
+    feature matrix and the names of its columns."""
     X = D.data
     cols = []
+    names = []
     for c in D.feature_names:
         if c not in D.categ_values:
             cols.append(np.asarray(X[c], float))
+            names.append(c)
         else:
             n_categs = len(D.categ_values[c])
             x = np.eye(n_categs)[X[c]]
             cols.append(x[:,:-1]) # skip last category
-    return np.column_stack(cols)
+            names.extend(f"{c}={v}" for v in D.categ_values[c][:-1])
+    return np.column_stack(cols), names
 
 D = fetch_Hillstrom(as_frame=True)
-X = encode_features(D)
+X, feature_names = encode_features(D)
 y = D.target_visit
 trt = D.treatment
 # keep women's campaign
@@ -67,7 +71,11 @@ base_classifier = Pipeline([("scaler", StandardScaler()),
 
 tree = UpliftTreeClassifier(max_depth=2, min_samples_leaf=100)
 tree.fit(X, y, trt, n_trt)
-print(export_text(tree))
+print(export_text(tree, feature_names=feature_names))
+fig, ax = plt.subplots(figsize=(12, 6))
+fig.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.94)
+plot_tree(tree, feature_names=feature_names, filled=True, rounded=True, ax=ax)
+ax.set_title("Uplift tree for visit, women's campaign vs. control")
 
 
 models = [MultimodelUpliftClassifier(base_estimator=base_classifier),
@@ -82,6 +90,7 @@ colors = list("rgbkcym") + ["orange", "lime", "grey", "brown", "pink", "gold", "
 avg_x = np.linspace(0,1,1000)
 avg_u = np.zeros((len(models), len(avg_x)))
 
+plt.figure()
 for train_index, test_index in tqdm(cv.split(X, y_stratify), total=n_iter):
     for mi, m in enumerate(models):
         m.fit(X[train_index], y[train_index], trt[train_index], n_trt)
