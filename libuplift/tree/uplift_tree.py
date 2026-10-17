@@ -118,7 +118,7 @@ class UpliftTreeBase(BaseEstimator):
         # combined treatment x class code of each sample, classes
         # encoded as 0..n_classes_-1
         y_enc = np.searchsorted(self.classes_, y)
-        code = trt * self.n_classes_ + y_enc
+        trt_y_code = trt * self.n_classes_ + y_enc
 
         # Build the tree using recursive partitioning
         if self.max_bins is None:
@@ -126,16 +126,16 @@ class UpliftTreeBase(BaseEstimator):
             # stable partitioning, so no sorting is needed below the root
             order = np.argsort(X, axis=0, kind="stable").T.copy()
             go_left = np.empty(X.shape[0], dtype=bool)
-            self.tree_ = self._build_tree(X, code, sample_weight, order, go_left, depth=0)
+            self.tree_ = self._build_tree(X, trt_y_code, sample_weight, order, go_left, depth=0)
         else:
             X_binned = self._bin_features(X)
-            self.tree_ = self._build_tree_hist(X, X_binned, code, sample_weight,
+            self.tree_ = self._build_tree_hist(X, X_binned, trt_y_code, sample_weight,
                                                np.arange(X.shape[0]), depth=0)
         del self._rng
 
         return self
 
-    def _build_tree(self, X, code, sample_weight, order, go_left, depth, trt_y_ct=None):
+    def _build_tree(self, X, trt_y_code, sample_weight, order, go_left, depth, trt_y_ct=None):
         """Recursively build the uplift tree.
 
         order is a (n_features, n_node_samples) array of sample indices
@@ -146,7 +146,7 @@ class UpliftTreeBase(BaseEstimator):
 
         # compute global statistics
         if trt_y_ct is None:
-            trt_y_ct = self._calculate_trt_y_ct(code[idx],
+            trt_y_ct = self._calculate_trt_y_ct(trt_y_code[idx],
                 sample_weight[idx] if sample_weight is not None else None)
 
         # Check stopping conditions
@@ -155,7 +155,7 @@ class UpliftTreeBase(BaseEstimator):
 
         # Find best split
         best_split, best_uplift_gain, best_left_ct, best_right_ct =\
-            self._find_best_split(X, code, sample_weight, order)
+            self._find_best_split(X, trt_y_code, sample_weight, order)
 
         if best_split is None:
             # No good split found, create leaf node
@@ -171,9 +171,9 @@ class UpliftTreeBase(BaseEstimator):
         right_order = order[~left_mask].reshape(order.shape[0], -1)
 
         # Create left and right children
-        left_child = self._build_tree(X, code, sample_weight, left_order, go_left,
+        left_child = self._build_tree(X, trt_y_code, sample_weight, left_order, go_left,
                                       depth + 1, trt_y_ct=best_left_ct)
-        right_child = self._build_tree(X, code, sample_weight, right_order, go_left,
+        right_child = self._build_tree(X, trt_y_code, sample_weight, right_order, go_left,
                                        depth + 1, trt_y_ct=best_right_ct)
 
         # Create internal node
@@ -204,13 +204,13 @@ class UpliftTreeBase(BaseEstimator):
                 X_binned[:, feature_idx] = np.searchsorted(edges, x, side="left")
         return X_binned
 
-    def _build_tree_hist(self, X, X_binned, code, sample_weight, idx, depth, trt_y_ct=None):
+    def _build_tree_hist(self, X, X_binned, trt_y_code, sample_weight, idx, depth, trt_y_ct=None):
         """Recursively build the uplift tree using binned features.
 
         idx contains indices of samples in the node."""
         # compute global statistics
         if trt_y_ct is None:
-            trt_y_ct = self._calculate_trt_y_ct(code[idx],
+            trt_y_ct = self._calculate_trt_y_ct(trt_y_code[idx],
                 sample_weight[idx] if sample_weight is not None else None)
 
         # Check stopping conditions
@@ -219,7 +219,7 @@ class UpliftTreeBase(BaseEstimator):
 
         # Find best split
         best_split, best_uplift_gain, best_left_ct, best_right_ct =\
-            self._find_best_split_hist(X_binned, code, sample_weight, idx)
+            self._find_best_split_hist(X_binned, trt_y_code, sample_weight, idx)
 
         if best_split is None:
             # No good split found, create leaf node
@@ -234,9 +234,9 @@ class UpliftTreeBase(BaseEstimator):
         threshold = (x[left_mask].max() + x[~left_mask].min()) / 2
 
         # Create left and right children
-        left_child = self._build_tree_hist(X, X_binned, code, sample_weight, idx[left_mask],
+        left_child = self._build_tree_hist(X, X_binned, trt_y_code, sample_weight, idx[left_mask],
                                            depth + 1, trt_y_ct=best_left_ct)
-        right_child = self._build_tree_hist(X, X_binned, code, sample_weight, idx[~left_mask],
+        right_child = self._build_tree_hist(X, X_binned, trt_y_code, sample_weight, idx[~left_mask],
                                             depth + 1, trt_y_ct=best_right_ct)
 
         # Create internal node
@@ -245,7 +245,7 @@ class UpliftTreeBase(BaseEstimator):
                              trt_y_ct=trt_y_ct, gain=float(best_uplift_gain))
         return utn
 
-    def _find_best_split_hist(self, X_binned, code, sample_weight, idx):
+    def _find_best_split_hist(self, X_binned, trt_y_code, sample_weight, idx):
         """Find the best split using per feature histograms.  Returns
         ((feature_idx, bin), gain, left_ct, right_ct), the left child
         gets samples in bins <= bin."""
@@ -259,7 +259,7 @@ class UpliftTreeBase(BaseEstimator):
         # treatment x class histograms of all features with a single
         # bincount, cell index is (feature, bin, treatment x class)
         cell = (np.arange(n_feat) * n_bins + X_binned[np.ix_(idx, feature_indices)]) \
-               * n_trt_y + code[idx, None]
+               * n_trt_y + trt_y_code[idx, None]
         weights = np.repeat(sample_weight[idx], n_feat) if sample_weight is not None else None
         hist = np.bincount(cell.ravel(), weights=weights, minlength=n_feat * n_bins * n_trt_y)
         if sample_weight is None:
@@ -300,7 +300,7 @@ class UpliftTreeBase(BaseEstimator):
             feature_indices = range(n_features)
         return feature_indices
 
-    def _find_best_split(self, X, code, sample_weight, order):
+    def _find_best_split(self, X, trt_y_code, sample_weight, order):
         """Find the best split that maximizes uplift."""
         best_gain = -np.inf
         best_split = None
@@ -323,9 +323,9 @@ class UpliftTreeBase(BaseEstimator):
             # treatment/class axes are cheap
             trt_y_cum = np.zeros((n_trt_y, n_node), dtype=cum_dtype)
             if sample_weight is not None:
-                trt_y_cum[code[sort_idx], np.arange(n_node)] = sample_weight[sort_idx]
+                trt_y_cum[trt_y_code[sort_idx], np.arange(n_node)] = sample_weight[sort_idx]
             else:
-                trt_y_cum[code[sort_idx], np.arange(n_node)] = 1
+                trt_y_cum[trt_y_code[sort_idx], np.arange(n_node)] = 1
             np.cumsum(trt_y_cum, axis=1, out=trt_y_cum)
             trt_y_cum = trt_y_cum.reshape(self.n_trt_ + 1, self.n_classes_, n_node)
             n_cum_left = trt_y_cum.sum(axis=1)
@@ -398,9 +398,9 @@ class UpliftTreeBase(BaseEstimator):
                 raise NotImplementedError()
         return gain
 
-    def _calculate_trt_y_ct(self, code, sample_weight=None):
+    def _calculate_trt_y_ct(self, trt_y_code, sample_weight=None):
         """Calculate treatment x outcome contingency table."""
-        trt_y_ct = np.bincount(code, weights=sample_weight,
+        trt_y_ct = np.bincount(trt_y_code, weights=sample_weight,
                                minlength=(self.n_trt_ + 1) * self.n_classes_)
         return trt_y_ct.reshape(self.n_trt_ + 1, self.n_classes_)
 
