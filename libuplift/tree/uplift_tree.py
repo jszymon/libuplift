@@ -124,7 +124,9 @@ class UpliftTreeBase(BaseEstimator):
         if self.max_bins is None:
             # sort each feature once; children inherit sorted orders by
             # stable partitioning, so no sorting is needed below the root
-            order = np.argsort(X, axis=0, kind="stable").T.copy()
+            # smallest integer type holding all sample indices
+            order = np.argsort(X, axis=0, kind="stable").T.astype(
+                np.min_scalar_type(X.shape[0] - 1))
             go_left = np.empty(X.shape[0], dtype=bool)
             self.tree_ = self._build_tree(X, trt_y_code, sample_weight, order, go_left, depth=0)
         else:
@@ -142,7 +144,8 @@ class UpliftTreeBase(BaseEstimator):
         of the node sorted by each feature.  go_left is a work buffer
         shared by all nodes.
         """
-        idx = order[0]
+        # numpy converts index arrays to intp when indexing, do it once
+        idx = order[0].astype(np.intp)
 
         # compute global statistics
         if trt_y_ct is None:
@@ -192,7 +195,9 @@ class UpliftTreeBase(BaseEstimator):
         bins.  Features with at most max_bins distinct values get one
         bin per value, others are binned using quantiles."""
         n_samples = X.shape[0]
-        X_binned = np.empty(X.shape, dtype=np.intp)
+        # smallest integer type holding all bin numbers (uint8 for
+        # max_bins <= 256)
+        X_binned = np.empty(X.shape, dtype=np.min_scalar_type(self.max_bins - 1))
         # quantile positions among order statistics, interpolated
         # linearly as in np.quantile
         q = np.linspace(0, 1, self.max_bins + 1)[1:-1]
@@ -330,7 +335,7 @@ class UpliftTreeBase(BaseEstimator):
 
         # Try each feature
         for feature_idx in feature_indices:
-            sort_idx = order[feature_idx]
+            sort_idx = order[feature_idx].astype(np.intp)
             x_sorted = X[sort_idx, feature_idx]
 
             # cumulative treatment x class counts, layout (n_trt+1,
