@@ -191,17 +191,30 @@ class UpliftTreeBase(BaseEstimator):
         """Replace each feature by its bin number, at most max_bins
         bins.  Features with at most max_bins distinct values get one
         bin per value, others are binned using quantiles."""
+        n_samples = X.shape[0]
         X_binned = np.empty(X.shape, dtype=np.intp)
+        # quantile positions among order statistics, interpolated
+        # linearly as in np.quantile
+        q = np.linspace(0, 1, self.max_bins + 1)[1:-1]
+        pos = q * (n_samples - 1)
+        lo = np.floor(pos).astype(np.intp)
+        hi = np.minimum(lo + 1, n_samples - 1)
+        t = pos - lo
         for feature_idx in range(X.shape[1]):
-            x = X[:, feature_idx]
-            u, inv = np.unique(x, return_inverse=True)
+            u, inv, counts = np.unique(X[:, feature_idx], return_inverse=True,
+                                       return_counts=True)
             if len(u) <= self.max_bins:
                 X_binned[:, feature_idx] = inv
-            else:
-                q = np.linspace(0, 1, self.max_bins + 1)[1:-1]
-                edges = np.unique(np.quantile(x, q))
-                # bin b contains edges[b-1] < x <= edges[b]
-                X_binned[:, feature_idx] = np.searchsorted(edges, x, side="left")
+                continue
+            # order statistics from the sorted unique values, the k-th
+            # one is the first value whose cumulative count exceeds k
+            cum_counts = np.cumsum(counts)
+            a = u[np.searchsorted(cum_counts, lo, side="right")]
+            b = u[np.searchsorted(cum_counts, hi, side="right")]
+            edges = np.unique(np.where(t < 0.5, a + (b - a) * t, b - (b - a) * (1 - t)))
+            # bin b contains edges[b-1] < x <= edges[b]; bin each
+            # unique value, then map to samples
+            X_binned[:, feature_idx] = np.searchsorted(edges, u, side="left")[inv]
         return X_binned
 
     def _build_tree_hist(self, X, X_binned, trt_y_code, sample_weight, idx, depth, trt_y_ct=None):
@@ -280,8 +293,8 @@ class UpliftTreeBase(BaseEstimator):
             return None, -np.inf, None, None
 
         left_ct = trt_y_cum[cand_f, cand_b].transpose(1, 2, 0)
-        right_ct = trt_y_tot[cand_f].transpose(1, 2, 0) - left_ct
-        gain = self._compute_gain(left_ct, right_ct,
+        total_ct = trt_y_tot[cand_f].transpose(1, 2, 0)
+        gain = self._compute_gain(left_ct, total_ct,
                                   n_cum_left[cand_f, cand_b].T, n_cum_right[cand_f, cand_b].T)
         gain[np.isnan(gain)] = -np.inf
 
@@ -289,7 +302,9 @@ class UpliftTreeBase(BaseEstimator):
         if gain[best_j] == -np.inf:
             return None, -np.inf, None, None
         best_split = (feature_indices[cand_f[best_j]], cand_b[best_j])
-        return best_split, gain[best_j], left_ct[:, :, best_j], right_ct[:, :, best_j]
+        best_left_ct = left_ct[:, :, best_j].copy()
+        best_right_ct = total_ct[:, :, best_j] - best_left_ct
+        return best_split, gain[best_j], best_left_ct, best_right_ct
 
     def _select_feature_subset(self, n_features):
         """Select a subset of features for random forest."""
@@ -344,31 +359,45 @@ class UpliftTreeBase(BaseEstimator):
             if cand.size == 0:
                 continue
 
-            left_ct = trt_y_cum[:, :, cand]
-            right_ct = trt_y_cum[:, :, -1:] - left_ct
-            gain = self._compute_gain(left_ct, right_ct,
-                                      n_cum_left[:, cand], n_cum_right[:, cand])
+            # with many candidates (e.g. continuous features) use a
+            # contiguous range of positions (views, no copying) and
+            # mask non-candidates afterwards, otherwise gather the
+            # candidate positions
+            dense = cand.size > n_node // 4
+            sel = slice(cand[0], cand[-1] + 1) if dense else cand
+            left_ct = trt_y_cum[:, :, sel]
+            gain = self._compute_gain(left_ct, trt_y_cum[:, :, -1:],
+                                      n_cum_left[:, sel], n_cum_right[:, sel])
+            if dense:
+                gain[~cand_mask[sel]] = -np.inf
             gain[np.isnan(gain)] = -np.inf
 
             best_j = np.argmax(gain)
             gain_i = gain[best_j]
 
             if gain_i > best_gain:
-                best_i = cand[best_j]
+                best_i = cand[0] + best_j if dense else cand[best_j]
                 best_gain = gain_i
                 best_split = (feature_idx, (x_sorted[best_i] + x_sorted[best_i+1]) / 2)
-                best_left_ct = left_ct[:, :, best_j]
-                best_right_ct = right_ct[:, :, best_j]
+                # copy, so that tree nodes do not keep the large
+                # cumulative count arrays alive
+                best_left_ct = trt_y_cum[:, :, best_i].copy()
+                best_right_ct = trt_y_cum[:, :, -1] - best_left_ct
 
         return best_split, best_gain, best_left_ct, best_right_ct
 
-    def _compute_gain(self, left_ct, right_ct, n_left, n_right):
+    def _compute_gain(self, left_ct, total_ct, n_left, n_right):
         """Compute split gains.
 
-        left_ct, right_ct are (n_trt+1, n_classes, n_splits) counts in
-        the left/right child for each candidate split, n_left, n_right
-        are (n_trt+1, n_splits) per treatment totals.
+        left_ct are (n_trt+1, n_classes, n_splits) counts in the left
+        child for each candidate split, total_ct are node counts
+        broadcastable to left_ct, n_left, n_right are (n_trt+1,
+        n_splits) per treatment totals of the left/right child.
         """
+        if self.n_trt_ == 1 and self.n_classes_ == 2 and \
+           self.splitting_criterion in ("E", "DeltaDeltaP"):
+            return self._compute_gain_binary(left_ct, total_ct, n_left, n_right)
+        right_ct = total_ct - left_ct
         # Outcome probabilities used by all measures
         with np.errstate(divide='ignore', invalid="ignore"):
             P_left = left_ct / n_left[:, None, :]
@@ -397,6 +426,32 @@ class UpliftTreeBase(BaseEstimator):
             else:
                 raise NotImplementedError()
         return gain
+
+    def _compute_gain_binary(self, left_ct, total_ct, n_left, n_right):
+        """_compute_gain for a single treatment and binary outcome.
+
+        Uses closed forms based on the response rates (class 1
+        probabilities) only, since P(y=0) = 1 - P(y=1).  Only for E
+        and DeltaDeltaP: for KL and Chi2 using 1 - P(y=1) instead of
+        P(y=0) changes results where the gain is infinite (class
+        probabilities 0 or 1)."""
+        left_1 = left_ct[:, 1]
+        right_1 = total_ct[:, 1] - left_1
+        with np.errstate(divide='ignore', invalid="ignore"):
+            # response rates, (treatment, n_splits)
+            p_left = left_1 / n_left
+            p_right = right_1 / n_right
+            if self.splitting_criterion == "DeltaDeltaP":
+                return np.abs((p_left[1] - p_left[0]) - (p_right[1] - p_right[0]))
+            if self.splitting_criterion == "E":
+                # both classes contribute the same squared difference
+                D_left = 2 * np.square(p_left[1] - p_left[0])
+                D_right = 2 * np.square(p_right[1] - p_right[0])
+            else:
+                raise NotImplementedError()
+            n_left_tot = n_left.sum(axis=0)
+            P_avg_left = n_left_tot / (n_left_tot + n_right.sum(axis=0))
+            return P_avg_left * D_left + (1 - P_avg_left) * D_right
 
     def _calculate_trt_y_ct(self, trt_y_code, sample_weight=None):
         """Calculate treatment x outcome contingency table."""
