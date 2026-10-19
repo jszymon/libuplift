@@ -336,7 +336,7 @@ class UpliftTreeBase(BaseEstimator):
         # Try each feature
         for feature_idx in feature_indices:
             sort_idx = order[feature_idx].astype(np.intp)
-            x_sorted = X[sort_idx, feature_idx]
+            x_sorted = X[:,feature_idx][sort_idx]
 
             # cumulative treatment x class counts, layout (n_trt+1,
             # n_classes, n_node) so that reductions over the small
