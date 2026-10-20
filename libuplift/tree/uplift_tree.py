@@ -172,6 +172,8 @@ class UpliftTreeBase(BaseEstimator):
         n_left = np.count_nonzero(left_mask[0])
         left_order = order[left_mask].reshape(order.shape[0], n_left)
         right_order = order[~left_mask].reshape(order.shape[0], -1)
+        # free before recursing, otherwise every ancestor keeps them alive
+        del left_mask, idx
 
         # Create left and right children
         left_child = self._build_tree(X, trt_y_code, sample_weight, left_order, go_left,
@@ -275,9 +277,12 @@ class UpliftTreeBase(BaseEstimator):
         n_feat = len(feature_indices)
 
         # treatment x class histograms of all features with a single
-        # bincount, cell index is (feature, bin, treatment x class)
-        cell = (np.arange(n_feat) * n_bins + X_binned[np.ix_(idx, feature_indices)]) \
-               * n_trt_y + trt_y_code[idx, None]
+        # bincount, cell index is (feature, bin, treatment x class),
+        # computed in place to avoid (n, n_feat) int64 temporaries
+        cell = X_binned[np.ix_(idx, feature_indices)].astype(np.intp)
+        cell += np.arange(n_feat) * n_bins
+        cell *= n_trt_y
+        cell += trt_y_code[idx, None]
         weights = np.repeat(sample_weight[idx], n_feat) if sample_weight is not None else None
         hist = np.bincount(cell.ravel(), weights=weights, minlength=n_feat * n_bins * n_trt_y)
         if sample_weight is None:
