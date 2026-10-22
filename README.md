@@ -17,6 +17,7 @@ The design goal of `libuplift` is to seamlessly integrate with `scikit-learn` an
   * medical RTC datasets
 * Tight integration with scikit-learn: model evaluation routines can be used just as in scikit-learn
 * Meta-models: T/S/X Learners, transformed target learner
+* Uplift trees, causal forests (wraps `R`'s `grf` library)
 
 ## Getting started
 
