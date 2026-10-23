@@ -30,7 +30,7 @@ pip install libuplift
 ```
 or to get the latest version install directly from Github
 ``` shell
-pip install git+https://github.com/jszymon/uplift-sklearn
+pip install git+https://github.com/jszymon/libuplift
 ```
 
 Let us now build an uplift model on the well known Hillstrom dataset.  Begin with the necessary imports:
@@ -66,6 +66,8 @@ By `libuplift` convention, treatments are denoted by successive integers with 0 
 Now, we're ready to fit an uplift model (TLearner in our case)
 
 ``` Python
+from libuplift.meta import TLearnerUpliftClassifier
+
 X_train, X_test, y_train, y_test, trt_train, trt_test = train_test_split(X, y, trt, train_size=0.7)
 m = TLearnerUpliftClassifier(base_estimator=LogisticRegression())
 m.fit(X_train, y_train, trt_train, n_trt=1)
