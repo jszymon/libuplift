@@ -66,14 +66,15 @@ class CausalForestUpliftBase(BaseEstimator):
     
     Examples
     --------
-    >>> from libuplift.tree import CausalForestRegressor
+    >>> from libuplift.tree import CausalForestUpliftClassifier
     >>> import numpy as np
     >>> X = np.random.randn(100, 5)
-    >>> y = np.random.randn(100)
+    >>> y = np.random.randint(0, 2, 100)
     >>> trt = np.random.randint(0, 2, 100)
-    >>> model = CausalForestRegressor(num_trees=100)
-    >>> model.fit(X, y, trt)
-    >>> predictions = model.predict(X)
+    >>> model = CausalForestUpliftClassifier(num_trees=100, seed=0)
+    >>> _ = model.fit(X, y, trt, n_trt=1)
+    >>> model.predict(X).shape
+    (100, 2)
     """
     
     def __init__(self, num_trees=2000, n_estimators=None, sample_fraction=0.5,
