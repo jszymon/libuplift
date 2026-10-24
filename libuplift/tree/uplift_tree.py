@@ -52,14 +52,12 @@ class UpliftTreeBase(BaseEstimator):
 
     def __init__(self, splitting_criterion="E", max_depth=None,
                  min_samples_split=100, min_samples_leaf=100,
-                 min_weight_fraction_leaf=None, max_features=None, random_state=None,
-                 max_bins=None):
+                 max_features=None, random_state=None, max_bins=None):
         super().__init__()
         self.splitting_criterion = splitting_criterion
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
-        self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.max_features = max_features
         self.random_state = random_state
         # if not None, features are binned into at most max_bins
@@ -486,7 +484,123 @@ class UpliftTreeBase(BaseEstimator):
         return predictions
 
 class UpliftTreeClassifier(UpliftClassifierMixin, UpliftTreeBase):
-    """Uplift Tree Classifier with proper recursive partitioning."""
+    """Uplift decision tree classifier.
+
+    The tree is built by recursive binary partitioning.  At each node
+    the split ``X[:, feature] <= threshold`` maximizing the selected
+    splitting criterion is chosen.  The criteria measure how much the
+    outcome distributions in the treatment groups differ from the
+    distribution in the control group in each child node, see
+    Rzepakowski and Jaroszewicz (2012).  Multiple treatments are
+    supported.
+
+    Parameters
+    ----------
+    splitting_criterion : {"E", "KL", "Chi2", "DeltaDeltaP"}, default="E"
+        The splitting criterion:
+
+        - ``"E"``: squared Euclidean distance between outcome
+          distributions in treatment and control groups, summed over
+          treatments and averaged over children weighted by their
+          sizes,
+        - ``"KL"``: Kullback-Leibler divergence, combined as for
+          ``"E"``,
+        - ``"Chi2"``: chi-squared divergence, combined as for ``"E"``,
+        - ``"DeltaDeltaP"``: maximum, over treatments and classes,
+          absolute difference between the uplifts in the left and
+          right child.
+
+    max_depth : int, default=None
+        Maximum depth of the tree.  If None, nodes are expanded until
+        other stopping conditions are met.
+
+    min_samples_split : int, default=100
+        A node is split only if each treatment group (including
+        control) contains at least ``min_samples_split`` samples.
+        Weighted counts are used if ``sample_weight`` is given.
+
+    min_samples_leaf : int, default=100
+        Minimum number of samples in each treatment group (including
+        control) in each child of a split.  Weighted counts are used
+        if ``sample_weight`` is given.
+
+    max_features : int, float, {"sqrt", "log2"} or None, default=None
+        Number of features randomly drawn as split candidates in each
+        node:
+
+        - if int, ``max_features`` features,
+        - if float, ``int(max_features * n_features)`` features,
+        - if ``"sqrt"``, ``int(sqrt(n_features))`` features,
+        - if ``"log2"``, ``int(log2(n_features))`` features,
+        - if None, all features.
+
+        At least one feature is always used.  Used mainly by random
+        forests.
+
+    random_state : int, RandomState instance or None, default=None
+        Controls the random selection of features when
+        ``max_features`` is not None.
+
+    max_bins : int or None, default=None
+        If not None, each feature is binned into at most ``max_bins``
+        quantile bins (``max_bins >= 2``) and split points are found
+        using histograms.  This is faster for large datasets and
+        exact for features with at most ``max_bins`` distinct values.
+        If None, all split points are examined.
+
+    Attributes
+    ----------
+    tree_ : UpliftTreeNode
+        The root node of the fitted tree.
+
+    classes_ : ndarray of shape (n_classes,)
+        The class labels.
+
+    n_classes_ : int
+        The number of classes.
+
+    n_trt_ : int
+        The number of treatments (excluding control).
+
+    n_features_in_ : int
+        Number of features seen during fit.
+
+    feature_names_in_ : list of str or None
+        Names of features seen during fit, if ``X`` had column names.
+
+    max_features_ : int or None
+        The inferred value of ``max_features``.
+
+    Notes
+    -----
+    ``fit`` takes the treatment assignment ``trt`` (control is 0,
+    treatments are 1, 2, ...) and optionally the number of treatments
+    ``n_trt`` in addition to ``X`` and ``y``.
+
+    ``predict`` returns, for each sample, the uplift in its leaf, that
+    is the difference between class probabilities in the treatment
+    and control groups.  The result has shape ``(n_samples,
+    n_classes)`` for a single treatment and ``(n_samples, n_trt,
+    n_classes)`` for multiple treatments.
+
+    References
+    ----------
+    .. [1] P. Rzepakowski and S. Jaroszewicz, "Decision trees for
+           uplift modeling with single and multiple treatments",
+           Knowledge and Information Systems, 32(2), 303-327, 2012.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from libuplift.tree import UpliftTreeClassifier
+    >>> rng = np.random.default_rng(0)
+    >>> X = rng.normal(size=(2000, 3))
+    >>> trt = rng.integers(0, 2, size=2000)
+    >>> y = (rng.random(2000) < 0.3 + 0.2 * trt * (X[:, 0] > 0)).astype(int)
+    >>> model = UpliftTreeClassifier(max_depth=3).fit(X, y, trt, n_trt=1)
+    >>> model.predict(X[:5]).shape
+    (5, 2)
+    """
 
     def predict(self, X):
         """Predict uplift for each sample."""
