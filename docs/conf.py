@@ -23,10 +23,15 @@ project = 'libuplift'
 copyright = '2026, Szymon Jaroszewicz'
 author = 'Szymon Jaroszewicz, Krzysztof Rudaś'
 
-# The short X.Y version
-version = '0.5'
+# Versions are read from pyproject.toml so they never go out of sync.
+import tomllib
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       '..', 'pyproject.toml'), 'rb') as _f:
+    _pyproject = tomllib.load(_f)
 # The full version, including alpha/beta/rc tags
-release = '0.5'
+release = _pyproject['project']['version']
+# The short X.Y version
+version = '.'.join(release.split('.')[:2])
 
 
 # -- General configuration ---------------------------------------------------
