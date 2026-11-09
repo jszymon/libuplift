@@ -74,7 +74,7 @@ def _fetch_remote(remote, dirname=None):
     return file_path
 
 def _read_csv(archive, feature_attrs, treatment_attrs, target_attrs,
-              total_attrs=None, categ_as_strings=False, header=None,
+              n_columns=None, categ_as_strings=False, header=None,
               csv_reader_args={"delimiter":",", "quotechar":'"'},
               all_num=False):
     """Read CSV data.
@@ -93,8 +93,8 @@ def _read_csv(archive, feature_attrs, treatment_attrs, target_attrs,
     return a transformed list and final numpy dtype.  Otherwise, type
     should be a valid numpy dtype.
     
-    If total_attrs is not None, it should contain the total number of
-    attributes in each record.
+    If n_columns is not None, it should contain the total number of
+    columns in each CSV record.
 
     if all_num is True, array is read as floats for speed.  This
     should be set only if all columns are either floats or ints.
@@ -145,14 +145,14 @@ def _read_csv(archive, feature_attrs, treatment_attrs, target_attrs,
             header = next(csvfile).strip().split(delim)
         if all_num:
             Xy_columns = np.loadtxt(csvfile, unpack=True, **csv_reader_args)
-            if total_attrs is not None:
-                assert len(Xy_columns) == total_attrs, (record, total_attrs)
+            if n_columns is not None:
+                assert len(Xy_columns) == n_columns, (record, n_columns)
         else:
             csvreader = csv.reader(csvfile, **csv_reader_args)
             for record in csvreader:
                 Xy.append(record)
-                if total_attrs is not None:
-                    assert len(record) == total_attrs, (record, total_attrs)
+                if n_columns is not None:
+                    assert len(record) == n_columns, (record, n_columns)
             Xy_columns = list(zip(*Xy))
     if isinstance(archive, str):
         remove(archive)
@@ -254,7 +254,7 @@ def _fetch_remote_csv(remote, dataset_name,
                       as_frame=False,
                       download_if_missing=True,
                       random_state=None, shuffle=False,
-                      header=None, total_attrs=None,
+                      header=None, n_columns=None,
                       csv_reader_args={"delimiter":",", "quotechar":'"'},
                       all_num=False,
                       record_mask=None, remove_vars=None,
@@ -284,7 +284,7 @@ def _fetch_remote_csv(remote, dataset_name,
         D =_read_csv(archive, feature_attrs=feature_attrs,
                      treatment_attrs=treatment_attrs,
                      target_attrs=target_attrs,
-                     total_attrs=total_attrs,
+                     n_columns=n_columns,
                      csv_reader_args=csv_reader_args,
                      categ_as_strings=categ_as_strings,
                      header=header, all_num=all_num)

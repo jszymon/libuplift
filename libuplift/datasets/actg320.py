@@ -168,7 +168,7 @@ def fetch_actg320(data_home=None,
                             return_X_y=return_X_y, as_frame=as_frame,
                             download_if_missing=download_if_missing,
                             random_state=random_state, shuffle=shuffle,
-                            total_attrs=15
+                            n_columns=15
                             )
     if not return_X_y:
         ret.descr = __doc__

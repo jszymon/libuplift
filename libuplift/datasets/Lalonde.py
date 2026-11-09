@@ -164,7 +164,7 @@ def fetch_Lalonde(version="A", data_home=None,
                             return_X_y=False, as_frame=as_frame,
                             download_if_missing=download_if_missing,
                             random_state=random_state, shuffle=False,
-                            total_attrs=n_fields, header=header,
+                            n_columns=n_fields, header=header,
                             csv_reader_args=csv_reader_args
                             )
     assert np.all(D_T.treatment == 1)
@@ -176,7 +176,7 @@ def fetch_Lalonde(version="A", data_home=None,
                             return_X_y=False, as_frame=as_frame,
                             download_if_missing=download_if_missing,
                             random_state=random_state, shuffle=False,
-                            total_attrs=n_fields, header=header,
+                            n_columns=n_fields, header=header,
                             csv_reader_args=csv_reader_args
                             )
     assert np.all(D_C.treatment == 0)

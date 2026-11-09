@@ -181,7 +181,7 @@ def fetch_Information(version="train", data_home=None,
                             return_X_y=return_X_y, as_frame=as_frame,
                             download_if_missing=download_if_missing,
                             random_state=random_state, shuffle=shuffle,
-                            total_attrs=69, all_num=True
+                            n_columns=69, all_num=True
                             )
     if not return_X_y:
         ret.descr = __doc__

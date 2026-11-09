@@ -219,7 +219,7 @@ def fetch_IST(include_pilot=True,
                             return_X_y=return_X_y, as_frame=as_frame,
                             download_if_missing=download_if_missing,
                             random_state=random_state, shuffle=shuffle,
-                            total_attrs=44, all_num=False,
+                            n_columns=44, all_num=False,
                             remove_vars=remove_vars, record_mask=record_mask
                             )
     if not return_X_y:

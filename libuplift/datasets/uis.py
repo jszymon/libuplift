@@ -157,7 +157,7 @@ def fetch_uis(data_home=None, download_if_missing=True,
                             return_X_y=return_X_y, as_frame=as_frame,
                             download_if_missing=download_if_missing,
                             random_state=random_state, shuffle=shuffle,
-                            total_attrs=17
+                            n_columns=17
                             )
     if not return_X_y:
         ret.descr = __doc__

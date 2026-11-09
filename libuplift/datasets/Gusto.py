@@ -247,7 +247,7 @@ def fetch_GUSTO(include_location_vars=True, include_ttr=False,
                             return_X_y=return_X_y, as_frame=as_frame,
                             download_if_missing=download_if_missing,
                             random_state=random_state, shuffle=shuffle,
-                            total_attrs=27, all_num=False,
+                            n_columns=27, all_num=False,
                             remove_vars=remove_vars
                             )
     if not return_X_y:
