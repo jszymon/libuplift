@@ -82,8 +82,10 @@ def fetch_actg320(data_home=None,
         levels.  The removed variables are regl, grpl, grps
     
     data_home : string, optional
-        Specify another download and cache folder for the datasets. By default
-        all scikit-learn data is stored in '~/scikit_learn_data' subfolders.
+        Specify another download and cache folder for the datasets.  Data
+        is cached in the 'libuplift' subfolder of data_home.  By default
+        data_home is scikit-learn's data folder: '~/scikit_learn_data',
+        or the value of the SCIKIT_LEARN_DATA environment variable if set.
 
     download_if_missing : boolean, default=True
         If False, raise a IOError if the data is not locally available

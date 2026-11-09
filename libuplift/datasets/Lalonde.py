@@ -63,8 +63,10 @@ def fetch_Lalonde(version="A", data_home=None,
         earnings.
 
     data_home : string, optional
-        Specify another download and cache folder for the datasets. By default
-        all scikit-learn data is stored in '~/scikit_learn_data' subfolders.
+        Specify another download and cache folder for the datasets.  Data
+        is cached in the 'libuplift' subfolder of data_home.  By default
+        data_home is scikit-learn's data folder: '~/scikit_learn_data',
+        or the value of the SCIKIT_LEARN_DATA environment variable if set.
 
     download_if_missing : boolean, default=True
         If False, raise a IOError if the data is not locally available
@@ -106,7 +108,7 @@ def fetch_Lalonde(version="A", data_home=None,
 
       
     #data_home = get_data_home(data_home=data_home)
-    #Lalonde_dir = join(data_home, "uplift_sklearn", "Lalonde")
+    #Lalonde_dir = join(data_home, "libuplift", "Lalonde")
     #samples_path = join(Lalonde_dir, "samples" + version_suffix)
     #targets_path = join(Lalonde_dir, "targets" + version_suffix)
     #treatment_path = join(Lalonde_dir, "treatment" + version_suffix)

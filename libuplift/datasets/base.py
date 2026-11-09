@@ -146,7 +146,7 @@ def _read_csv(archive, feature_attrs, treatment_attrs, target_attrs,
         if all_num:
             Xy_columns = np.loadtxt(csvfile, unpack=True, **csv_reader_args)
             if n_columns is not None:
-                assert len(Xy_columns) == n_columns, (record, n_columns)
+                assert len(Xy_columns) == n_columns, (len(Xy_columns), n_columns)
         else:
             csvreader = csv.reader(csvfile, **csv_reader_args)
             for record in csvreader:
@@ -262,7 +262,7 @@ def _fetch_remote_csv(remote, dataset_name,
     if logger is None:
         logger = logging.getLogger(__name__ + "." + dataset_name)
     data_home = get_data_home(data_home=data_home)
-    dataset_dir = join(data_home, "uplift_sklearn", dataset_name)
+    dataset_dir = join(data_home, "libuplift", dataset_name)
     if categ_as_strings:
         dataset_path = join(dataset_dir, "bunch_str")
     else:
