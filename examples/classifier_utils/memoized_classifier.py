@@ -1,6 +1,6 @@
-"""======================================================
+"""=========================================================
 Accelerating multi-model training with MemoizedClassifier
-======================================================
+=========================================================
 
 In uplift modeling, multiple meta-models often fit identical base estimators on
 the same data subsets. For example, :class:`~libuplift.meta.TLearnerUpliftClassifier`

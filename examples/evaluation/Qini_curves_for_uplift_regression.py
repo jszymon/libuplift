@@ -101,9 +101,9 @@ print("Qini coefficient = ", Qini_coefficient(y_test, score, trt_test, n_trt=1))
 
 cx, cy = uplift_curve(y_test, score, trt_test, n_trt=1)
 cx_opt, cy_opt = optimal_uplift_curve(y_test, trt_test, n_trt=1)
-plt.plot(cx, cy)
-plt.plot(cx_opt, cy_opt, "r-")
-plt.plot([0,1], [0,cy[-1]], "k-")
+plt.plot(cx, cy, label="curve")
+plt.plot(cx_opt, cy_opt, "r-", label="optimal")
+plt.plot([0,1], [0,cy[-1]], "k-", label="random")
 plt.title("Uplift curve (spend)")
 
 plt.figlegend(ncols=3, loc="lower center")

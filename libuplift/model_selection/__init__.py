@@ -1,4 +1,3 @@
-from ._validation import uplift_check_cv
 from ._validation import cross_validate, cross_val_score
 from ._validation import cross_val_predict, permutation_test_score
 from ._validation import learning_curve

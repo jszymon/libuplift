@@ -146,7 +146,7 @@ html_static_path = []
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'uplift_sklearndoc'
+htmlhelp_basename = 'libupliftdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------

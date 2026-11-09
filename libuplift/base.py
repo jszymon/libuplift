@@ -16,7 +16,7 @@ class _BaseUpliftMixin:
         else:
             a = np.argmax(y, axis=1) + 1
             best_y = np.max(y, axis=1)
-            a[best_y <= 0] == 0
+            a[best_y <= 0] = 0
         return a
     def _set_fit_params(self, y, trt, n_trt):
         """Set attributes related to fitted data common to all models
@@ -72,7 +72,7 @@ class UpliftClassifierMixin(_BaseUpliftMixin, ClassifierMixin):
         else:
             a = np.argmax(y, axis=1) + 1
             best_y = np.max(y, axis=1)
-            a[best_y <= 0] == 0
+            a[best_y <= 0] = 0
         return a
     def _set_fit_params(self, y, trt, n_trt):
         """Also set class list and number of classes."""

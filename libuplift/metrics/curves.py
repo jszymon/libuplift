@@ -137,11 +137,11 @@ def Qini_curve(y_true, y_score, trt, n_trt=None, pos_label=None,
     on the treated group.  Number of successes on the control group is
     scaled by the relative group sizes.
 
-    Only `separate' variant is provided.
+    Only the 'separate' variant is provided.
 
     .. [1] Radcliffe, Nicholas J. (2007). "Using control groups to
-    target on predicted lift: Building and assessing uplift model",
-    Direct Marketing Analytics Journal, 14-21.
+       target on predicted lift: Building and assessing uplift model",
+       Direct Marketing Analytics Journal, 14-21.
 
     """
     trt, n_trt = check_trt(trt, n_trt)
