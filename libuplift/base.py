@@ -70,6 +70,7 @@ class UpliftClassifierMixin(_BaseUpliftMixin, ClassifierMixin):
         if self.n_trt_ == 1:
             a = (y[:,pos_label] > 0)*1
         else:
+            y = y[:, :, pos_label]
             a = np.argmax(y, axis=1) + 1
             best_y = np.max(y, axis=1)
             a[best_y <= 0] = 0
